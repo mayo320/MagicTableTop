@@ -1,0 +1,19 @@
+{
+  "name": "mmgame",
+  "version": "1.0.0",
+  "description": "Magic Mirror Tabletop Games framework",
+  "main": "js/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Jack Yan",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.16.3",
+    "helmet": "^3.13.0"
+  },
+  "dependencies": {
+    "electron": "^2.0.8",
+    "socket.io": "^2.1.1"
+  }
+}
