@@ -5,7 +5,18 @@
 		<title>Joining</title>
 	</head>
 	<body>
+		<script src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript">
+			socket = io();
+			function avc(){
+				socket.emit("ev-playerjoin", document.getElementById("playername").value);
+			}
+		</script>
+
 		<h1>Hello Player</h1>
 		<div>joinging page</div>
+		<input type="text" id="playername">
+		<button onclick="avc()">Join</button>
+
 	</body>
 </html>

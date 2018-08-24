@@ -15,6 +15,7 @@ var Server = function(config, callback){
 
 	server.listen(port, config.address);
 
+	// Handle requests
 	app.use(function(req, res, next){
 		return next();
 	});
@@ -31,21 +32,7 @@ var Server = function(config, callback){
 		app.use(dirs[i], express.static(path.resolve(global.root_path + dirs[i])));
 	}
 
-	// Set responses
-	// Default is playing joining
-	app.get("/", function(req, res){
-		var html = fs.readFileSync(path.resolve(global.root_path + "/join.html"), {encoding: "utf8"});
-
-		res.send(html);
-	});
-
-	// Main page that is shown on mirror
-	app.get("/main", function(req, res){
-		var html = fs.readFileSync(path.resolve(global.root_path + "/index.html"), {encoding: "utf8"});
-
-		res.send(html);
-	});
-
+	// Callback returning to app.js with express app and socket.io
 	if (typeof callback === "function") {
 		callback(app, io);
 	}

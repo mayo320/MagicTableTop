@@ -5,7 +5,67 @@
 		<title>Hello World!</title>
 	</head>
 	<body>
+		<style type="text/css">
+			.disconnected .pname{
+				text-decoration: line-through;
+			}
+			.dis-txt{
+				display: none;
+				color: grey;
+			}
+			.disconnected .dis-txt{
+				display: inline;
+			}
+		</style>
+		<script src="js/jquery.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+
 		<h1>Main Menu</h1>
-		<div>waiting for players</div>
+		<hr>
+		<h2>Players</h2>
+		<ul id="playerlist"></ul>
+		<hr>
+		<h2>Games</h2>
+		<ul id="games"></ul>
+
+		<script type="text/javascript">
+			var players = [];
+			var games = {{GAMES}};
+
+			function addPlayer(p){
+				var $p = $("li[ip='"+p.clientip+"']");
+				if ($p.length == 0){
+					players.push(p);
+					$("#playerlist").append("<li ip='"+p.clientip+"'><span class='pname'>"+p.name+"</span> <span class='dis-txt'>disconnected</span></li>");
+				}else{
+					$p.html(p.name);
+					$p.removeClass("disconnected");
+				}
+			}
+			function removePlayer(p){				
+				var $p = $("li[ip='"+p.clientip+"']");
+				if ($p.length != 0){
+					$p.addClass("disconnected");
+				}
+			}
+
+			socket = io();
+			socket.on('ev-playerjoin', function(player){
+				addPlayer(player);
+			});
+			socket.on('ev-playerleave', function(player){
+				removePlayer(player);
+			});
+
+			for(var i = 0; i < games.length; i++){
+				var g = games[i];
+				var li = "<li>";
+				li += g.name;
+				li += " | " + g.player_count[0] + " - " + g.player_count[1] + " players";
+				li += " | " + g.playtime;
+				li += "</li>";
+				$("#games").append(li);
+			}
+		</script>
 	</body>
 </html>
