@@ -29,8 +29,8 @@ function createWindow () {
 	mainWindow = new BrowserWindow(electronOptionsDefaults);
 
 	// and load the index.html of the app.
-	var address = (config.address === void 0) | (config.address === "") ? (config.address = "localhost") : config.address;
-	mainWindow.loadURL(`http://${address}:${config.port}/main`);
+	config.address = (config.address === void 0) | (config.address === "") ? (config.address = "localhost") : config.address;
+	mainWindow.loadURL(`http://${config.address}:${config.port}/main`);
 	// mainWindow.loadFile('index.html');
 
 	// Open the DevTools.

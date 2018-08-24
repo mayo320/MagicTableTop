@@ -5,11 +5,33 @@
 		<title>Joining</title>
 	</head>
 	<body>
+		<style type="text/css">
+			.hidden{
+				display: none;
+			}
+		</style>
+		<script src="js/jquery.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script type="text/javascript">
-			socket = io();
+			var playerID = -1;
+			var socket = io("/player");
+			socket.on("ev-playgame", function(gameURL){
+				window.location.href = gameURL;
+			});
+			socket.on("ev-joined", function(pID){
+				playerID = pID;
+				if (playerID == 0){
+					// set up host UI
+					$("#gamelist").removeClass("hidden");
+				}
+			})
+
+
 			function avc(){
 				socket.emit("ev-playerjoin", document.getElementById("playername").value);
+			}
+			function playGame(gameName){
+				socket.emit("ev-playgame", gameName);
 			}
 		</script>
 
@@ -17,6 +39,22 @@
 		<div>joinging page</div>
 		<input type="text" id="playername">
 		<button onclick="avc()">Join</button>
-
+		<div id="gamelist" class="hidden">
+			<h3>Hi Host</h3>
+			<p>When ever everyone is ready, click on a game to start the game.</p>
+			<ul></ul>
+		</div>
+		<script type="text/javascript">
+			var games = {{GAMES}};
+			
+			var $ul = $("#gamelist ul");
+			for(var i in games){
+				var g = games[i];
+				var li = "<li>";
+				li += "<button onclick='playGame(\""+g.name+"\")'>" + g.name + "</button>";
+				li += "</li>";
+				$ul.append(li);
+			}
+		</script>
 	</body>
 </html>

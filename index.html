@@ -21,6 +21,8 @@
 		<script src="/socket.io/socket.io.js"></script>
 
 		<h1>Main Menu</h1>
+		<p>Join the game by going to this url on your phone browser: 
+			<span style="font-weight: 900;">{{FULLURL}}</span></p>
 		<hr>
 		<h2>Players</h2>
 		<ul id="playerlist"></ul>
@@ -31,30 +33,39 @@
 		<script type="text/javascript">
 			var players = [];
 			var games = {{GAMES}};
+			socket = io("/main");
 
 			function addPlayer(p){
+				console.log(p.name + " joined");
 				var $p = $("li[ip='"+p.clientip+"']");
 				if ($p.length == 0){
 					players.push(p);
 					$("#playerlist").append("<li ip='"+p.clientip+"'><span class='pname'>"+p.name+"</span> <span class='dis-txt'>disconnected</span></li>");
 				}else{
-					$p.html(p.name);
+					$p.find(".pname").html(p.name);
 					$p.removeClass("disconnected");
 				}
 			}
-			function removePlayer(p){				
+			function removePlayer(p){
+				console.log(p.name + " left");
 				var $p = $("li[ip='"+p.clientip+"']");
 				if ($p.length != 0){
 					$p.addClass("disconnected");
 				}
 			}
 
-			socket = io();
+			function playGame(gameName){
+				socket.emit("ev-playgame", gameName);
+			}
+
 			socket.on('ev-playerjoin', function(player){
 				addPlayer(player);
 			});
 			socket.on('ev-playerleave', function(player){
 				removePlayer(player);
+			});
+			socket.on("ev-playgame", function(gameURL){
+				window.location.href = gameURL;
 			});
 
 			for(var i = 0; i < games.length; i++){
@@ -63,6 +74,7 @@
 				li += g.name;
 				li += " | " + g.player_count[0] + " - " + g.player_count[1] + " players";
 				li += " | " + g.playtime;
+				li += " <button onclick='playGame(\""+g.name+"\")'> PLAY </button>"
 				li += "</li>";
 				$("#games").append(li);
 			}

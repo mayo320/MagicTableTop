@@ -9,10 +9,27 @@ var Game = require(__dirname + "/game.js");
 
 global.root_path = path.resolve(__dirname + "/../");
 
+var interfaces = require('os').networkInterfaces();
+global.addresses = [];
+for (var k in interfaces) {
+    for (var k2 in interfaces[k]) {
+        var address = interfaces[k][k2];
+        if (address.family === 'IPv4' && !address.internal) {
+            global.addresses.push(address.address);
+        }
+    }
+}
+global.addresses = global.addresses.length == 0 ? ["IP-TO-MAGIC-TABLETOP"] : global.addresses;
+
 
 var App = function(){
 	var config;
 	var games = [];
+	var playersIO;
+	var mainIO;
+
+	var app; // the express object
+	var io; // the socket.io object
 
 	/* setupGames()
 	 * populate the games array with data.
@@ -23,7 +40,9 @@ var App = function(){
 	 	for(var i in config.games){
 	 		var gameConfig = config.games[i];
 		 	var gameObjectPath = path.resolve(global.root_path + "/games/" + gameConfig.name + "/game.js");
-	 		var game = new Game(require(gameObjectPath));
+	 		var game = new Game(require(gameObjectPath), session);
+	 		// game.setupHTML(app);
+	 		// game.setupSocketIO(io);
 
 	 		if (typeof game != "undefined"){
 	 			games.push(game);
@@ -38,17 +57,23 @@ var App = function(){
 	 *
 	 * argument express object - the express app object
 	 */
-	var setupHTML = function(app){
+	var setupHTML = function(_app){
 		// Main page that is shown on mirror
+		app = _app;
 		app.get("/main", (req, res) => {
 			if (!session.initialized || true){
 				session.initialize();
 				var html = fs.readFileSync(path.resolve(global.root_path + "/index.html"), {encoding: "utf8"});
+				
+				var fullUrl = req.protocol + '://' + global.addresses[0] + ":" + config.port;
+				html = html.replace("{{FULLURL}}", fullUrl);
+
 				var json = [];
 				for (var i in games){
 					json.push(games[i].toMainpageJson());
 				}
 				html = html.replace("{{GAMES}}", JSON.stringify(json));
+
 				res.send(html);
 			}else{
 				res.send("<h1>HEY! This is not the Magic Tabletop??</h1>");
@@ -62,9 +87,31 @@ var App = function(){
 			}
 			else{
 				var html = fs.readFileSync(path.resolve(global.root_path + "/join.html"), {encoding: "utf8"});
+				var json = [];
+				for (var i in games){
+					json.push(games[i].toMainpageJson());
+				}
+				html = html.replace("{{GAMES}}", JSON.stringify(json));
 				res.send(html);
 			}
 		});
+	}
+
+	var startGame = function(gameName){
+		var game = null;
+		for(var i in games){
+			if (games[i].name == gameName){
+				game = games[i];
+			}
+		}
+
+		if (game != null){
+			game.setupHTML(app);
+			game.setupSocketIO(io);
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	/* setupSocketIO(io)
@@ -72,11 +119,15 @@ var App = function(){
 	 *
 	 * argument socket.io - the io object
 	 */
-	var setupSocketIO = function(io){
-		// IO Test
-		io.on("connection", function(socket){
+	var setupSocketIO = function(_io){
+		io = _io;
+		playersIO = io.of("/player");
+		mainIO = io.of("/main");
+
+		// Settings IO on players
+		playersIO.on("connection", function(socket){
 			socket.on("ev-playerjoin", function(playername){
-				var p = session.findPlayer(socket.request.connection.remoteAddress);
+				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 
 				if (p == null){
 					console.log(playername + " Joined");
@@ -86,19 +137,35 @@ var App = function(){
 				}
 
 				if (p != null){
-					io.emit("ev-playerjoin", {
+					p.connect();
+					mainIO.emit("ev-playerjoin", {
 						name: p.name, 
 						socketid: p.socket.id,
 						clientip: p.socketip
 					});
+					socket.emit("ev-joined", p.id);
+				}
+			});
+
+			socket.on("ev-playgame", function(gameName){
+				if (startGame(gameName)){
+					var playerUrl = `http://${global.addresses[0]}:${config.port}/${gameName}`;
+					playersIO.emit("ev-playgame", playerUrl);
+
+					var url = `http://${config.address}:${config.port}/main/${gameName}`;
+					mainIO.emit("ev-playgame", url);
+				}else{
+					mainIO.emit("ev-error", "Game \"" + gameName + "\" does not exist.");
 				}
 			});
 
 			socket.on("disconnect", function(){
-				var p = session.findPlayer(socket.request.connection.remoteAddress);
+				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 
 				if (p != null){
-					io.emit("ev-playerleave", {
+					console.log(p.name + " disconnected");
+					p.disconnect();
+					mainIO.emit("ev-playerleave", {
 						name: p.name, 
 						socketid: p.socket.id,
 						clientip: p.socketip
@@ -118,7 +185,7 @@ var App = function(){
 		config = require(global.root_path + "/config.js");
 
 		var server = new Server(config, function(app, io){
-			setupGames(config);
+			setupGames(config, app, io);
 			setupHTML(app);
 			setupSocketIO(io);
 		});

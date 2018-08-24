@@ -6,8 +6,6 @@ var config = {
 	games: [
 		{
 			name: "Splendor", // required - must match folder name inside "games" folder
-			player_count: [2,4], // required - min and max player inclusive
-			playtime: "20+ min", // required - string indicating playtime
 			disabled: false, // optional
 
 			config: [ // optional
@@ -15,8 +13,6 @@ var config = {
 		},
 		{
 			name: "Catan", // required - must match folder name inside "games" folder
-			player_count: [2,4], // required - min and max player inclusive
-			playtime: "40+ min", // required - string indicating playtime
 			disabled: false, // optional
 			
 			config: [ // optional

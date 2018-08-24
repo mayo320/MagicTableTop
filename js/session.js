@@ -16,10 +16,11 @@ var Session = function(){
 		player.name = playername;
 		player.socket = socket;
 		player.socketip = socket.request.connection.remoteAddress;
+		player.id = this.players.length;
 		this.players.push(player);
 		return player;
 	}
-	this.findPlayer = function(socketip){
+	this.findPlayerByIp = function(socketip){
 		for(var i in this.players){
 			if (this.players[i].socketip == socketip){
 				return this.players[i];
