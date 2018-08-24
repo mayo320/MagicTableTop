@@ -16,6 +16,11 @@
 			.disconnected .dis-txt{
 				display: inline;
 			}
+			.host-txt{
+				display: none; color: orange;
+			}
+			.host .host-txt{display: inline;}
+			.disconnected .host-txt{display: none;}
 		</style>
 		<script src="js/jquery.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
@@ -37,10 +42,10 @@
 
 			function addPlayer(p){
 				console.log(p.name + " joined");
-				var $p = $("li[ip='"+p.clientip+"']");
+				var $p = $("#playerlist li[ip='"+p.clientip+"']");
 				if ($p.length == 0){
 					players.push(p);
-					$("#playerlist").append("<li ip='"+p.clientip+"'><span class='pname'>"+p.name+"</span> <span class='dis-txt'>disconnected</span></li>");
+					$("#playerlist").append("<li ip='"+p.clientip+"'><span class='pname'>"+p.name+"</span> <span class='dis-txt'> - disconnected</span> <span class='host-txt'> - host</span></li>");
 				}else{
 					$p.find(".pname").html(p.name);
 					$p.removeClass("disconnected");
@@ -48,7 +53,7 @@
 			}
 			function removePlayer(p){
 				console.log(p.name + " left");
-				var $p = $("li[ip='"+p.clientip+"']");
+				var $p = $("#playerlist li[ip='"+p.clientip+"']");
 				if ($p.length != 0){
 					$p.addClass("disconnected");
 				}
@@ -67,6 +72,13 @@
 			socket.on("ev-playgame", function(gameURL){
 				window.location.href = gameURL;
 			});
+			socket.on("ev-sethost", function(pID){
+				$players = $("#playerlist li");
+				$players.removeClass("host");
+				if (pID < $players.length){
+					$($players[pID]).addClass("host");
+				}
+			})
 
 			for(var i = 0; i < games.length; i++){
 				var g = games[i];

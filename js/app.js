@@ -86,13 +86,18 @@ var App = function(){
 				res.send("<h1>Main menu is not yet initialized</h1>");
 			}
 			else{
-				var html = fs.readFileSync(path.resolve(global.root_path + "/join.html"), {encoding: "utf8"});
-				var json = [];
-				for (var i in games){
-					json.push(games[i].toMainpageJson());
+				if (session.ingame){
+					res.send("<h1>There is already a game going on. Joined too late?</h1>");
 				}
-				html = html.replace("{{GAMES}}", JSON.stringify(json));
-				res.send(html);
+				else{
+					var html = fs.readFileSync(path.resolve(global.root_path + "/join.html"), {encoding: "utf8"});
+					var json = [];
+					for (var i in games){
+						json.push(games[i].toMainpageJson());
+					}
+					html = html.replace("{{GAMES}}", JSON.stringify(json));
+					res.send(html);
+				}
 			}
 		});
 	}
@@ -106,11 +111,26 @@ var App = function(){
 		}
 
 		if (game != null){
+			console.log("Starting game " + gameName + "...");
 			game.setupHTML(app);
 			game.setupSocketIO(io);
+			game.startGame();
 			return true;
 		}else{
 			return false;
+		}
+	}
+
+	var updateLobbyHost = function(){
+		var set = false;
+		playersIO.emit("ev-sethost", false);
+		for (var i in session.players){
+			var p = session.players[i];
+			if (p.connected && !set){
+				p.socket.emit("ev-sethost", true);
+				mainIO.emit("ev-sethost", p.id);
+				set = true;
+			}
 		}
 	}
 
@@ -126,13 +146,20 @@ var App = function(){
 
 		// Settings IO on players
 		playersIO.on("connection", function(socket){
+
+			var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
+			if (p != null){
+				// Updates the socket for reconnects
+				p.update(socket);
+			}
+
 			socket.on("ev-playerjoin", function(playername){
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-
 				if (p == null){
 					console.log(playername + " Joined");
 					p = session.addPlayer(playername, socket);
 				}else{
+					console.log(playername + " Rejoined");
 					p.name = playername;
 				}
 
@@ -144,24 +171,26 @@ var App = function(){
 						clientip: p.socketip
 					});
 					socket.emit("ev-joined", p.id);
+					updateLobbyHost();
 				}
 			});
 
 			socket.on("ev-playgame", function(gameName){
-				if (startGame(gameName)){
-					var playerUrl = `http://${global.addresses[0]}:${config.port}/${gameName}`;
-					playersIO.emit("ev-playgame", playerUrl);
+				if (!session.ingame){
+					if (startGame(gameName)){
+						var playerUrl = `http://${global.addresses[0]}:${config.port}/${gameName}`;
+						playersIO.emit("ev-playgame", playerUrl);
 
-					var url = `http://${config.address}:${config.port}/main/${gameName}`;
-					mainIO.emit("ev-playgame", url);
-				}else{
-					mainIO.emit("ev-error", "Game \"" + gameName + "\" does not exist.");
+						var url = `http://${config.address}:${config.port}/main/${gameName}`;
+						mainIO.emit("ev-playgame", url);
+					}else{
+						mainIO.emit("ev-error", "Game \"" + gameName + "\" does not exist.");
+					}
 				}
 			});
 
 			socket.on("disconnect", function(){
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-
 				if (p != null){
 					console.log(p.name + " disconnected");
 					p.disconnect();
@@ -170,6 +199,7 @@ var App = function(){
 						socketid: p.socket.id,
 						clientip: p.socketip
 					});
+					updateLobbyHost();
 				}
 			});
 		});

@@ -20,10 +20,49 @@ var Game = function(gameObject, session){
 	this.playerHTML = path.resolve(this.home_path + "/" + (gameObject.playerHTML ? "player.html" : gameObject.playerHTML));
 
 	// Functions
-	this.init = gameObject.init;
+	this.startGame = function(){
+		this.session.ingame = true;
+		this.players = this.session.players;
+		for (var i in this.players){
+			this.playerJoin(this.players[i]);
+		}
+
+		this.mainIO.clients((err, clients) => {
+			for (var i in clients){
+				this.mainIO.connected[clients[i]].join(this.name);
+			}
+		});
+
+		if (typeof this.gameObject.initPlayers == "function"){
+			var players = [];
+			for (var i in this.players){
+				var p = this.players[i];
+				players.push({name:p.name, id:p.id});
+			}
+			this.gameObject.initPlayers(players);
+		}
+	}
+	this.endGame = function(){
+		this.session.ingame = false;
+		this.players = this.session.players;
+		for (var i in this.players){
+			this.playerLeave(this.players[i]);
+		}
+
+		this.mainIO.clients((err, clients) => {
+			for (var i in clients){
+				this.mainIO.connected[clients[i]].leave(this.name);
+			}
+		});
+	}
+	this.playerJoin = function(player){
+		player.socket.join(this.name);
+	}
+	this.playerLeave = function(player){
+		player.socket.leave(this.name);
+	}
 
 	this.setupHTML = function(app){
-		console.log(this.home_path);
 		var relPath = "/games/"+this.name;
 		app.use(relPath, express.static(this.home_path));
 		for (var i in this.gameObject.mappableFolders){
@@ -50,8 +89,39 @@ var Game = function(gameObject, session){
 		});
 	}
 	this.setupSocketIO = function(io){
-		playersIO = io.of("/player");
-		mainIO = io.of("/main");
+		this.playersIO = io.of("/player");
+		this.mainIO = io.of("/main");
+
+		this.mainIO.in(this.name).on("connection", (socket) => {
+			socket.use((packet, next) => {
+				this.gameObject.onReceiveEventFromMain(packet[0], packet[1]);
+				next();
+			})
+		});
+
+		this.playersIO.in(this.name).on("connection", (socket) => {
+			socket.use((packet, next) => {
+				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
+				this.gameObject.onReceiveEventFromPlayer(p.id, packet[0], packet[1]);
+				next();
+			})
+		});
+
+		this.gameObject.sendEventToPlayers = (players, event, payload) => {
+			players = players.map((x) => parseInt(x));
+			for (var i in this.players){
+				if (players.indexOf(this.players[i].id) >= 0){
+					this.players[i].socket.emit(event, payload);
+				}
+			}
+		}
+		this.gameObject.sendEventToMain = (event, payload) => {
+			this.mainIO.emit(event, payload);
+		}
+		this.gameObject.sendEventToAll = (event, payload) => {
+			this.mainIO.emit(event, payload);
+			this.playersIO.emit(event, payload);
+		}
 	}
 
 	this.toMainpageJson = function(){

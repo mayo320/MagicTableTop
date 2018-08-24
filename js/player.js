@@ -13,6 +13,10 @@ var Player = function(){
 	this.disconnect = function(){
 		this.connected = false;
 	}
+	this.update = function(socket){
+		this.socket = socket;
+		this.socketip = socket.request.connection.remoteAddress;
+	}
 }
 
 module.exports = Player;

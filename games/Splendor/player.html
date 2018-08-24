@@ -1,1 +1,18 @@
-Splendor Player
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Splendor</title>
+</head>
+<body>
+	<script src="/js/jquery.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/clientsocket.js"></script>
+	<script type="text/javascript">
+		var socket = new MTSocket("player");
+		socket.onReceiveEvent("INIT", (payload) => {
+			console.log("initialized with " + payload);
+		})
+	</script>
+	<h2>Welcome {{PLAYERNAME}}.</h2>
+</body>
+</html>

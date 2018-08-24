@@ -4,6 +4,7 @@ var Player = require(__dirname + "/player.js");
 
 var Session = function(){
 	this.initialized = false;
+	this.ingame = false;
 	this.players = [];
 	this.game = null;
 
@@ -14,8 +15,7 @@ var Session = function(){
 	this.addPlayer = function(playername, socket){
 		var player = new Player();
 		player.name = playername;
-		player.socket = socket;
-		player.socketip = socket.request.connection.remoteAddress;
+		player.update(socket);
 		player.id = this.players.length;
 		this.players.push(player);
 		return player;

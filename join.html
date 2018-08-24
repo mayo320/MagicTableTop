@@ -20,11 +20,11 @@
 			});
 			socket.on("ev-joined", function(pID){
 				playerID = pID;
-				if (playerID == 0){
-					// set up host UI
-					$("#gamelist").removeClass("hidden");
-				}
-			})
+			});
+			socket.on("ev-sethost", function(flag){
+				if (flag) $("#gamelist").removeClass("hidden");
+				else $("#gamelist").addClass("hidden");
+			});
 
 
 			function avc(){
