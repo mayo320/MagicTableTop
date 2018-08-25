@@ -2,15 +2,145 @@
 <html>
 <head>
 	<title>Splendor</title>
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="/games/Splendor/css/style.css">
 </head>
 <body>
 	<script src="/js/jquery.js"></script>
+	<script src="/js/bootstrap.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/js/clientsocket.js"></script>
 	<script type="text/javascript">
-		var socket = MTSocket("main");
 	</script>
-	<script src="/games/Splendor/js/temp.js"></script>
-	<h2>Splendor</h2>
+	<script src="/games/Splendor/js/frontend.js"></script>
+	
+	<div id="game-frame">		
+		<div class="container card-container" style="">
+			<div class="row" id="card-t3">
+				<div class="col-2 backdeck sCard"><div><img src="https://i.imgur.com/fAbKsAa.jpg" class=""></div></div>
+				<div class="col-10">
+					<div class="row">
+						<div class="col-3 sCard playable">
+							<div>
+								<img class="bg" src="https://i.imgur.com/KIjjoVe.jpg">
+								<div class="overlay">
+									<div class="top">
+										<h1 class="vp">3</h1>
+										<img class="grant" src="https://i.imgur.com/eitlUgF.jpg">
+									</div>
+									<div class="cost-cont">
+										<div>
+											<img src="https://i.imgur.com/eitlUgF.jpg">
+											<h3 class="cost">5</h3>
+										</div>
+										<div>
+											<img src="https://i.imgur.com/wGRgzus.jpg">
+											<h3 class="cost">5</h3>
+										</div>
+										<div>
+											<img src="https://i.imgur.com/joDax0e.jpg">
+											<h3 class="cost">5</h3>
+										</div>
+										<div>
+											<img src="https://i.imgur.com/wGRgzus.jpg">
+											<h3 class="cost">5</h3>
+										</div>
+										<div>
+											<img src="https://i.imgur.com/joDax0e.jpg">
+											<h3 class="cost">5</h3>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="card-t2">
+				<div class="col-2 backdeck sCard"><div><img src="https://i.imgur.com/asmPWdT.jpg" class=""></div></div>
+				<div class="col-10">
+					<div class="row">
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="card-t1">
+				<div class="col-2 backdeck sCard"><div><img src="https://i.imgur.com/WPKlYji.jpg" class=""></div></div>
+				<div class="col-10">
+					<div class="row">
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+						<div class="col-3 sCard playable"></div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="currency-pool">
+				<div class="col-2" style="text-align: center;">
+					<button>Reserve</button></div>
+				<div class="col-2"><img src="https://i.imgur.com/eitlUgF.jpg"></div>
+				<div class="col-2"><img src="https://i.imgur.com/wGRgzus.jpg"></div>
+				<div class="col-2"><img src="https://i.imgur.com/joDax0e.jpg"></div>
+				<div class="col-2"><img src="https://i.imgur.com/FkNJi2s.jpg"></div>
+				<div class="col-2"><img src="https://i.imgur.com/KLrP95l.jpg"></div>
+			</div>
+		</div>
+
+		<div id="player-data-container">
+			<div class="player-data hidden current-turn" id="pdata-0">
+				<h3 class="info-name">Jack</h3> <hr>
+				<h5>Victory Points: <span class="info-vp">15</span></h5>
+				<h5>Settlers: <span class="info-settlers">1</span></h5> <hr>
+				<div class="container">
+					<div class="row">
+						<div class="col-4"><span>Perm</span></div>
+						<div class="col-4"><span></span></div>
+						<div class="col-4"><span>Fluid</span></div>
+					</div>
+					<div class="row">
+						<div class="col"><h5 class="curr-perm">2</h5></div>
+						<div class="col"><img src="https://i.imgur.com/eitlUgF.jpg"></div>
+						<div class="col"><h5 class="curr-fluid">2</h5></div>
+					</div>
+					<div class="row">
+						<div class="col"><h5 class="curr-perm">2</h5></div>
+						<div class="col"><img src="https://i.imgur.com/wGRgzus.jpg"></div>
+						<div class="col"><h5 class="curr-fluid">2</h5></div>
+					</div>
+					<div class="row">
+						<div class="col"><h5 class="curr-perm">2</h5></div>
+						<div class="col"><img src="https://i.imgur.com/joDax0e.jpg"></div>
+						<div class="col"><h5 class="curr-fluid">2</h5></div>
+					</div>
+					<div class="row">
+						<div class="col"><h5 class="curr-perm">2</h5></div>
+						<div class="col"><img src="https://i.imgur.com/FkNJi2s.jpg"></div>
+						<div class="col"><h5 class="curr-fluid">2</h5></div>
+					</div>
+					<div class="row">
+						<div class="col"><h5 class="curr-perm">2</h5></div>
+						<div class="col"><img src="https://i.imgur.com/KLrP95l.jpg"></div>
+						<div class="col"><h5 class="curr-fluid">2</h5></div>
+					</div>
+				</div>
+			</div>
+			<div class="player-data hidden" id="pdata-1">
+				
+			</div>
+			<div class="player-data hidden" id="pdata-2">
+				
+			</div>
+			<div class="player-data hidden" id="pdata-3">
+				
+			</div>
+		</div>
+
+	</div>
 </body>
 </html>

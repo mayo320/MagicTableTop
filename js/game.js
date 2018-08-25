@@ -37,7 +37,10 @@ var Game = function(gameObject, session){
 			var players = [];
 			for (var i in this.players){
 				var p = this.players[i];
-				players.push({name:p.name, id:p.id});
+				
+				if(players.length <= this.player_count[1] && p.connected){
+					players.push({name:p.name, id:p.id, host:p.host});
+				}
 			}
 			this.gameObject.initPlayers(players);
 		}

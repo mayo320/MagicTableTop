@@ -122,14 +122,26 @@ var App = function(){
 	}
 
 	var updateLobbyHost = function(){
-		var set = false;
 		playersIO.emit("ev-sethost", false);
 		for (var i in session.players){
 			var p = session.players[i];
+			if (p.connected && p.host){
+				// already has a valid host, return
+				p.socket.emit("ev-sethost", true);
+				mainIO.emit("ev-sethost", p.id);
+				return;
+			}
+		}
+		var set = false;
+		for (var i in session.players){
+			var p = session.players[i];
 			if (p.connected && !set){
+				p.host = true;
 				p.socket.emit("ev-sethost", true);
 				mainIO.emit("ev-sethost", p.id);
 				set = true;
+			}else{
+				p.host = false;
 			}
 		}
 	}

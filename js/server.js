@@ -27,9 +27,10 @@ var Server = function(config, callback){
 
 	// Map static path to app path 
 	app.use("/js", express.static(__dirname));
-	var dirs = ["games"];
+	// app.use("/css", express.static(path.resolve(global.root_path + "/css")));
+	var dirs = ["games", "css"];
 	for (var i in dirs){
-		app.use("/"+dirs[i], express.static(path.resolve(global.root_path + dirs[i])));
+		app.use("/"+dirs[i], express.static(path.resolve(global.root_path + "/" + dirs[i])));
 	}
 
 	// Callback returning to app.js with express app and socket.io

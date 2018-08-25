@@ -6,6 +6,7 @@ var Player = function(){
 	this.name = "";
 	this.socket = null;
 	this.socketip = "0.0.0.0";
+	this.host = false;
 
 	this.connect = function(){
 		this.connected = true;
