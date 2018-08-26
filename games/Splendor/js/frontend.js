@@ -131,9 +131,16 @@ $(document).ready(function(){
 	socket.onReceiveEvent("RESERVE_CARD", function(payload){
 		gameManager.onReceivePlayerAction("RESERVE_CARD", payload);
 	});
+	socket.onReceiveEvent("PLAYER_CONNECT", function(payload){
+		gameManager.broadcastData(0b11111);
+	});
+	socket.onReceiveEvent("PLAYER_DISCONNECT", function(payload){
+		gameManager.broadcastData(0b11111);
+	});
 
 	gameManager = new GameManager();
 	gameManager.initializeBoard();
+	gameManager.initizliePlayers();
 
 	playerUITemplate = getPlayerUITemplate();
 	updatePlayerUI(playerUITemplate);
@@ -143,6 +150,11 @@ $(document).ready(function(){
 
 	currencyPoolUITemplate = getCurrPoolUITemplate();
 	updateCurrPoolUI(currencyPoolUITemplate);
+
+	gameManager.nextTurn();
+
+	// everything initialized
+	gameManager.broadcastData(0b11111);
 });
 
 
@@ -513,6 +525,29 @@ var GameManager = function(){
 		if (0b10000 & mask){ data.card_backgrounds = card_backgrounds;}
 		socket.sendEvent("BROADCAST", data);
 	}
+	this.initizliePlayers = function(){
+		if (typeof backend_players == "undefined"){
+			return;
+		}
+		var keys = Object.keys(backend_players);
+		players.splice(keys.length, (players.length - keys.length));
+		for(var i in keys){
+			i = parseInt(i);
+			var k = keys[i];
+			players[i].name = backend_players[k].name;
+			players[i].vp = 0;
+			players[i].settlers = 0;
+			players[i].reserved = [];
+			players[i].currency = [
+				{perm:0, fluid:0},
+				{perm:0, fluid:0},
+				{perm:0, fluid:0},
+				{perm:0, fluid:0},
+				{perm:0, fluid:0},
+			];
+			delete players[i].won;
+		}
+	}
 	this.initializeBoard = function(){
 		board = [[],[],[]];
 		for(var i = 0; i < 4; i++){
@@ -523,11 +558,20 @@ var GameManager = function(){
 	}
 	this.playerTurn = function(playerID){
 		// Notify player that it's their turn, now wait for action from player.
+		players[this.currentTurnID].currentturn = true;
+		$("#pdata-"+this.currentTurnID).addClass("current-turn");
 		socket.sendEvent("PLAYER_TURN", playerID);
 	}
 	this.nextTurn = function(){
+		if(this.currentTurnID < 0){
+			this.currentTurnID = 0;
+			this.playerTurn(this.currentTurnID);
+			return;
+		}
+
 		$("#pdata-"+this.currentTurnID).removeClass("current-turn");
-		this.checkPlayerWinCondition(playerID);
+		this.checkPlayerWinCondition(this.currentTurnID);
+		players[this.currentTurnID].currentturn = false;
 
 		var iter = 0;
 		while (players[this.currentTurnID + 1].win && iter < players.length){
@@ -538,7 +582,6 @@ var GameManager = function(){
 			this.gameOver();
 		}
 		else{
-			$("#pdata-"+this.currentTurnID).addClass("current-turn");
 			this.playerTurn(this.currentTurnID);
 		}
 		if (this.currentTurnID == 0) this.totalTurns += 1;

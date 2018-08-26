@@ -1,0 +1,55 @@
+body{
+	margin: 0; padding: 0; position: absolute; left: 0; top: 0;
+	width: 100%; height: 100%; background: black; color: white;
+	overflow: hidden;
+}
+.hidden{
+	display: none !important;
+}
+#game-frame{
+	width: 100%;
+}
+.row{
+	margin: 0.2rem 1rem;
+}
+.card{
+	width: 24%; display: inline-block; position: relative;
+}
+.card.disabled{
+	opacity: 0.3;
+}
+.card img{
+	width: 100%;
+}
+.card .overlay{
+	/*position: absolute; top: 0; left:0;*/
+}
+.card .overlay .top{
+	width: 100%; position: absolute; top:0; left: 0; height: 4rem;
+	background: rgba(0,0,0,0.8)
+}
+.card .overlay .vp{
+	margin: 1rem; display: inline-block;
+	text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+.card .overlay .top img{width: 4rem; position: absolute; right: 0; top: 0;}
+#currency-pool{
+	position: absolute; bottom: 1rem; left: 0; width: 100%; height: 5rem; 
+	margin: 1rem;
+}
+#currency-pool .currency{
+	width: 15%; position: relative; display: inline-block;
+}
+#currency-pool .currency img{
+	width: 100%;
+}
+
+#not-your-turn{
+	position: fixed; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+	display: flex; align-items: center; justify-content: center;
+	top: 0; left: 0;
+}

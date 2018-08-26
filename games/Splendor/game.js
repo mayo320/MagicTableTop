@@ -13,27 +13,34 @@ var Game = function(){
 
 	// optional	fields
 	this.players = {};
+	this.IDLUT = []; // index: playerID in front end; value at index: playerID in backend
 
 	// required functions
-	this.initMainHTML = function(html){
-		return html;
-	}
-	this.initPlayerHTML = function(playerID, html){
-		html = html.replace("{{PLAYERNAME}}", this.players[playerID].name);
-		return html;
-	}
 	this.initPlayers = function(players){
 		for (var i in players){
 			var p = players[i];
 			this.players[p.id] = {
 				id: p.id,
-				name: p.name
-			}
+				name: p.name,
+				ishost: p.host
+			};
+			this.IDLUT.push(p.id);
 		}
+	}
+	// initPlayers would already be called
+	this.initMainHTML = function(html){
+		html = html.replace("{{PLAYERS}}", JSON.stringify(this.players));
+		return html;
+	}
+	this.initPlayerHTML = function(playerID, html){
+		var myID = this.IDLUT.indexOf(playerID);
+		html = html.replace("{{PLAYERNAME}}", this.players[playerID].name);
+		html = html.replace("{{PLAYERID}}", myID);
+		return html;
 	}
 
 	this.sendEventToPlayers = function(players, event, payload){
-		// players = list of int representing player id
+		// players = list of int representing player id (the p.id in initPlayers)
 		// leave this function empty (will be filled at run time)
 	}
 	this.sendEventToMain = function(event, payload){
@@ -43,21 +50,29 @@ var Game = function(){
 		// leave this function empty (will be filled at run time)
 	}
 
+	// Fill these out
+	this.onPlayerConnect = function(playerID){
+		this.sendEventToMain("PLAYER_CONNECT", this.IDLUT.indexOf(playerID));
+	}
+	this.onPlayerDisconnect = function(playerID){
+		this.sendEventToMain("PLAYER_DISCONNECT", this.IDLUT.indexOf(playerID));
+	}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
 		// use "disconnect" for user disconnect event
 		console.log("received " + event + " from player " + playerID + " with payload " + payload);
-		this.sendEventToPlayers(Object.keys(this.players), event, payload);
+		var trueID = this.IDLUT[playerID];
+		this.sendEventToPlayers(this.IDLUT, event, payload);
 	}
 	this.onReceiveEventFromMain = function(event, payload){
 		// console.log("received " + event + " from main" + " with payload " + payload);
 		switch(event){
 			case "PLAYER_TURN":
 				// Send to specific player
-				this.sendEventToPlayers([payload], "PLAYER_TURN", true);
+				this.sendEventToPlayers([this.IDLUT[payload]], "PLAYER_TURN", true);
 				break;
 			case "BROADCAST":
-				// Send to all players
-				this.sendEventToPlayers(Object.keys(this.players), "BROADCAST", payload);
+				// Send to all
+				this.sendEventToAll("BROADCAST", payload);
 				break;
 		}
 	}

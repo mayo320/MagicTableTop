@@ -103,10 +103,20 @@ var Game = function(gameObject, session){
 		});
 
 		this.playersIO.in(this.name).on("connection", (socket) => {
+			var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
+			if (p != null){
+				this.gameObject.onPlayerConnect(p.id);
+			}
+
 			socket.use((packet, next) => {
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 				this.gameObject.onReceiveEventFromPlayer(p.id, packet[0], packet[1]);
 				next();
+			});
+
+			socket.on("disconnect", () => {
+				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
+				this.gameObject.onPlayerDisconnect(p.id);
 			})
 		});
 
