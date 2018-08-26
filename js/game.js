@@ -28,6 +28,7 @@ var Game = function(gameObject, session){
 		}
 
 		this.mainIO.clients((err, clients) => {
+			// Join main client to this game room
 			for (var i in clients){
 				this.mainIO.connected[clients[i]].join(this.name);
 			}
@@ -95,6 +96,19 @@ var Game = function(gameObject, session){
 		this.playersIO = io.of("/player");
 		this.mainIO = io.of("/main");
 
+		io.of("/").in(this.name).on("connection", (socket) => {
+			socket.on("ev-restartgame", (payload) => {
+				console.log("Restarting game " + this.name + "...");
+				io.of("/").in(this.name).emit("ev-restartgame", true);
+			});
+			socket.on("ev-endgame", (payload) => {
+				this.endGame();
+			});
+			socket.on("ev-returnHome", (payload) => {
+				this.endGame();
+			});
+		});
+
 		this.mainIO.in(this.name).on("connection", (socket) => {
 			socket.use((packet, next) => {
 				this.gameObject.onReceiveEventFromMain(packet[0], packet[1]);
@@ -116,8 +130,10 @@ var Game = function(gameObject, session){
 
 			socket.on("disconnect", () => {
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-				this.gameObject.onPlayerDisconnect(p.id);
-			})
+				if (p != null){
+					this.gameObject.onPlayerDisconnect(p.id);
+				}
+			});
 		});
 
 		this.gameObject.sendEventToPlayers = (players, event, payload) => {

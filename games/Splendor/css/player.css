@@ -15,6 +15,11 @@ body{
 .sCard{
 	width: 24%; display: inline-block; position: relative; margin: 2px;
 }
+.sCard .X{ 
+	display: none; color: red; position: absolute; left: 0; right: 0; top: 0; bottom: 0; margin: auto;
+	text-align: center; width: 100%; height: 1rem;
+}
+.sCard.disabled .X{ display: block; }
 .sCard.disabled{
 	opacity: 0.3;
 }
@@ -68,21 +73,35 @@ body{
 #confirm-box .sCard .top .vp{
 	position: absolute; left: 1rem;
 }
+#confirm-box .sCard{border-radius: 1rem; overflow: hidden;}
 #confirm-box .sCard .overlay .costs{
 	position: absolute; left: 0.2rem; bottom: 0.2rem;
 }
 #confirm-box .sCard .overlay .costs>div{
+	position: relative;
+}
+#confirm-box .sCard .overlay .costs .actualcost{
+	top: 0; left: 100%; background: rgba(0,0,0,0.8); padding: 0.2rem 1rem; border-radius: 0.5rem;
+	margin: 0; width: 4rem;
+}
+#confirm-box .sCard .overlay .costs .curr{
 	width: 2.5rem; height: 2.5rem;overflow: hidden; display: flex; align-items: center; justify-content: center;
 	border-radius: 50%; color: white; border: 2px solid white; margin: 0.2rem;
 }
-#confirm-box .sCard .overlay .costs>div img{
+#confirm-box .sCard .overlay .costs .curr img{
 	width: 6rem;
 }
-#confirm-box .sCard .overlay .costs>div .cost{
-	position: absolute;
+#confirm-box .sCard .overlay .costs>div .cost,
+#confirm-box .sCard .overlay .costs .actualcost{
+	position: absolute; color: white;
 	text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
     -1px 1px 0 #000,
     1px 1px 0 #000;
 }
+#confirm-box .coin{
+	height: 5rem; display: flex; align-items: center; justify-content: center;
+	overflow: hidden;
+}
+#confirm-box .coin img{height: 140%;}

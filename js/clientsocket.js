@@ -3,11 +3,24 @@
 var MTSocket = function(soc_type){
 	var socket = io("/"+soc_type);
 
+	socket.on("ev-restartgame", (payload) => {
+		console.log("Restarting game...");
+		location.reload();
+	});
+
 	this.onReceiveEvent = function(event, callback){
 		socket.on(event, (payload) => callback(payload));
 	}
 
 	this.sendEvent = function(event, payload){
 		socket.emit(event, payload);
+	}
+
+	this.restartGame = function(){
+		console.log("Requesting server to restart game...");
+		socket.emit("ev-restartgame", true);
+	}
+	this.returnHome = function(){
+
 	}
 }

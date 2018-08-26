@@ -517,6 +517,7 @@ var GameManager = function(){
 		// ob00100 - currency info
 		// 0b01000 - remaining cards in deck info
 		// 0b10000 - card backgrounds
+		mask = typeof mask == "undefined" ? 0b11111 : mask;
 		var data = {}
 		if (0b1 & mask){ data.players = players;}
 		if (0b10 & mask){ data.board = board;}
@@ -560,10 +561,13 @@ var GameManager = function(){
 		// Notify player that it's their turn, now wait for action from player.
 		players[this.currentTurnID].currentturn = true;
 		$("#pdata-"+this.currentTurnID).addClass("current-turn");
-		socket.sendEvent("PLAYER_TURN", playerID);
+		// socket.sendEvent("PLAYER_TURN", playerID);
+		this.broadcastData();
 	}
 	this.nextTurn = function(){
-		if(this.currentTurnID < 0){
+		print("calling nextTurn()..");
+
+		if (this.currentTurnID < 0){
 			this.currentTurnID = 0;
 			this.playerTurn(this.currentTurnID);
 			return;
@@ -574,11 +578,13 @@ var GameManager = function(){
 		players[this.currentTurnID].currentturn = false;
 
 		var iter = 0;
-		while (players[this.currentTurnID + 1].win && iter < players.length){
+		do{
 			this.currentTurnID += 1; iter += 1;
 			this.currentTurnID = this.currentTurnID < players.length ? this.currentTurnID : 0;
-		}
-		if (iter >= players.length){
+		} while (players[this.currentTurnID].won && iter < players.length - 1)
+		
+		if (iter >= players.length - 1){
+			updatePlayerUI();
 			this.gameOver();
 		}
 		else{
@@ -604,7 +610,6 @@ var GameManager = function(){
 			}
 		}
 
-		print(places);
 		for (var i in places){
 			i = parseInt(i);
 			if (places[i].length == 0){continue;}
@@ -613,6 +618,8 @@ var GameManager = function(){
 			$("#gameover #place"+(i+1)).closest("li").removeClass("hidden");
 			$("#gameover #place"+(i+1)).html(html);
 		}
+
+		socket.sendEvent("GAMEOVER", true);
 	}
 	this.checkPlayerWinCondition = function(playerID){
 		if (players[playerID].vp >= 15){
@@ -682,6 +689,7 @@ var GameManager = function(){
 						$($("#card-t" + tier +" .sCard.playable")[actionData.index]).removeClass("reserved");
 					}
 					
+					p.vp += card.vp;
 					p.currency[card.grant].perm += 1;
 					var newcard = deck[tier-1].length > 0 ? deck[tier-1].splice(random(0,deck[tier-1].length),1)[0] : {};
 					inAnimation = true;

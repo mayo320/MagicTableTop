@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Splendor</title>
-	<meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86">
+	<meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86, user-scalable=no">
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="/games/Splendor/css/player.css">
 </head>
@@ -15,6 +15,7 @@
 	<script src="/games/Splendor/js/player.js"></script>
 	<script type="text/javascript">
 		var myID = {{PLAYERID}};
+		var isHost = {{ISHOST}};
 	</script>
 	<h2>Welcome {{PLAYERNAME}}</h2>
 
@@ -27,6 +28,7 @@
 						<h2 class="vp">4</h2>
 						<img class="grant" src="https://i.imgur.com/lttA91k.jpg">
 					</div>
+					<h1 class="X">X</h1>
 				</div>
 			</div>
 			<div class="sCard"><img src=""></div>
@@ -49,8 +51,8 @@
 		<div id="currency-pool">
 			<div class="currency" name="token"></div>
 			<div class="currency template" name="ruby">
-				<img src="https://i.imgur.com/lttA91k.jpg">
-				<div class="picked">
+				<img onclick="pickCurr(this)" src="https://i.imgur.com/lttA91k.jpg">
+				<div class="picked" onclick="removeCurr(this)">
 					<h3>0</h3>
 				</div>
 			</div>

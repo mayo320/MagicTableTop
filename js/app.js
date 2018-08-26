@@ -41,8 +41,6 @@ var App = function(){
 	 		var gameConfig = config.games[i];
 		 	var gameObjectPath = path.resolve(global.root_path + "/games/" + gameConfig.name + "/game.js");
 	 		var game = new Game(require(gameObjectPath), session);
-	 		// game.setupHTML(app);
-	 		// game.setupSocketIO(io);
 
 	 		if (typeof game != "undefined"){
 	 			games.push(game);
@@ -204,7 +202,6 @@ var App = function(){
 			socket.on("disconnect", function(){
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 				if (p != null){
-					console.log(p.name + " disconnected");
 					p.disconnect();
 					mainIO.emit("ev-playerleave", {
 						name: p.name, 

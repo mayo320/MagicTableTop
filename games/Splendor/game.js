@@ -35,6 +35,7 @@ var Game = function(){
 	this.initPlayerHTML = function(playerID, html){
 		var myID = this.IDLUT.indexOf(playerID);
 		html = html.replace("{{PLAYERNAME}}", this.players[playerID].name);
+		html = html.replace("{{ISHOST}}", this.players[playerID].ishost);
 		html = html.replace("{{PLAYERID}}", myID);
 		return html;
 	}
@@ -72,6 +73,8 @@ var Game = function(){
 				// Send to all
 				this.sendEventToAll("BROADCAST", payload);
 				break;
+			case "GAMEOVER":
+				this.sendEventToAll("GAMEOVER", payload);
 		}
 	}
 
