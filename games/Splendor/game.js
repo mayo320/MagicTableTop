@@ -49,7 +49,17 @@ var Game = function(){
 		this.sendEventToPlayers(Object.keys(this.players), event, payload);
 	}
 	this.onReceiveEventFromMain = function(event, payload){
-		console.log("received " + event + " from main" + " with payload " + payload);
+		// console.log("received " + event + " from main" + " with payload " + payload);
+		switch(event){
+			case "PLAYER_TURN":
+				// Send to specific player
+				this.sendEventToPlayers([payload], "PLAYER_TURN", true);
+				break;
+			case "BROADCAST":
+				// Send to all players
+				this.sendEventToPlayers(Object.keys(this.players), "BROADCAST", payload);
+				break;
+		}
 	}
 
 	// optional functions

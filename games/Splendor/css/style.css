@@ -2,6 +2,12 @@ body{
 	margin: 0px; padding: 0px; position: absolute; width: 100%; height: 100%;
 	top: 0; left: 0; background: black;
 }
+li{
+	list-style: none;
+}
+ul{
+	padding: 0;
+}
 
 .hidden{
 	display: none !important;
@@ -86,7 +92,7 @@ body{
 	position: fixed; width: 15rem; height: 25rem; background: rgba(0,0,0,0.9); 
 	text-align: center; color: white;
 }
-.player-data hr{ border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;}
+hr{ border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;}
 #pdata-0{ left: 0; top: 0; border-bottom-right-radius: 3rem;}
 #pdata-1{ right: 0; top: 0; border-bottom-left-radius: 3rem;}
 #pdata-2{ left: 0; bottom: 0; border-top-right-radius: 3rem;}
@@ -122,4 +128,14 @@ body{
 }
 .absolute-center{
 	position: absolute; margin: auto; left: 0; right: 0; bottom: 0; top: 0;
+}
+
+#gameover{
+	position: fixed !important; z-index: 90; color: white;
+	display: flex; align-items: center; justify-content: center;
+	transition: 1s ease;
+}
+#gameover>div{
+	width: 20rem; height: 20rem; text-align: center; background: rgba(0,0,0,0.9);
+	border-radius: 2rem;
 }

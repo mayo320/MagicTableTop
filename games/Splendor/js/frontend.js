@@ -1,9 +1,6 @@
 var print = console.log;
 var socket;
 var gameManager;
-var currency_ind = {
-	ruby: 0, sapphire: 1, diamond: 2, emerald: 3, onyx: 4, token: 5
-}
 var currency = [
 	{
 		name: "ruby",
@@ -38,20 +35,20 @@ var currency = [
 ];
 var players = [
 	{
-		name: "Jack",
+		won:10,name: "Jack",
 		vp: 2,
 		settlers: 1,
 		reserved: [],
 		currency: [
-			{perm:0, fluid:1},
-			{perm:0, fluid:1},
-			{perm:0, fluid:1},
-			{perm:0, fluid:1},
-			{perm:0, fluid:1},
+			{perm:5, fluid:1},
+			{perm:5, fluid:1},
+			{perm:5, fluid:1},
+			{perm:5, fluid:1},
+			{perm:5, fluid:1},
 		]
 	},
 	{
-		name: "Bran",
+		won:12,name: "Bran",
 		vp: 1,
 		settlers: 0,
 		reserved: [],
@@ -64,7 +61,7 @@ var players = [
 		]
 	},
 	{
-		name: "Sal",
+		won:10,name: "Sal",
 		vp: 2,
 		settlers: 1,
 		reserved: [],
@@ -77,7 +74,7 @@ var players = [
 		]
 	},
 	{
-		name: "Farhat",
+		won:11,name: "Farhat",
 		vp: 2,
 		settlers: 99,
 		reserved: [],
@@ -121,10 +118,22 @@ var board = [
 var playerUITemplate = "";
 var cardUITemplate = "";
 var currencyPoolUITemplate = "";
+var inAnimation = false;
 
 $(document).ready(function(){
 	socket = new MTSocket("main");
+	socket.onReceiveEvent("PICK_CARD", function(payload){
+		gameManager.onReceivePlayerAction("PICK_CARD", payload);
+	});
+	socket.onReceiveEvent("PICK_COIN", function(payload){
+		gameManager.onReceivePlayerAction("PICK_COIN", payload);
+	});
+	socket.onReceiveEvent("RESERVE_CARD", function(payload){
+		gameManager.onReceivePlayerAction("RESERVE_CARD", payload);
+	});
+
 	gameManager = new GameManager();
+	gameManager.initializeBoard();
 
 	playerUITemplate = getPlayerUITemplate();
 	updatePlayerUI(playerUITemplate);
@@ -176,7 +185,7 @@ function updateTierCardsUI(tier, cTemplate){
 		var card = board[tier-1][i];
 		$($cards[i]).html(cTemplate);
 		// update card BG
-		$($cards[i]).find(".bg").attr("src", card_backgrounds[card.bg]);
+		$($cards[i]).find(".bg").attr("src", card_backgrounds[card.bg % card_backgrounds.length]);
 		// update card VP
 		if(card.vp == 0){
 			$($cards[i]).find(".vp").addClass("hidden");
@@ -227,20 +236,20 @@ function updateCurrPoolUI(cpTemplate){
 }
 
 // ACTION FUNCTIONs
-function playerPickUpCard(playerID, tier, index, callback){
+function playerPickUpCard(playerID, tier, index, newcard, callback){
 	var imgs = $("#card-t"+tier+" .sCard.playable .bg");
 	if (index < imgs.length){
 		var imgObj = imgs[index];
 		animCardToPlayer(imgObj, playerID);
 		setTimeout(() => {
-			animFillCardSlotFromDeck(imgObj, tier);
+			animFillCardSlotFromDeck(imgObj, tier, newcard);
 		}, 1200);
 	}
 
 	if (typeof callback === "function"){
-		setTimeout(function(p, t, i) {
-			callback(p, t, i);
-		}, 2300, playerID, tier, index);
+		setTimeout(function(p, t, i, n) {
+			callback(p, t, i, n);
+		}, 2300, playerID, tier, index, newcard);
 	}
 
 }
@@ -304,7 +313,7 @@ function animCardToPlayer(imgObj, playerID){
 	}, delay + 100)
 }
 
-function animFillCardSlotFromDeck(imgObj, tier, callback){
+function animFillCardSlotFromDeck(imgObj, tier, newcard, callback){
 	$(imgObj).css("opacity", "0");
 	var $card = $(imgObj).closest(".sCard.playable");
 	$card.css("opacity", "0");
@@ -348,7 +357,7 @@ function animFillCardSlotFromDeck(imgObj, tier, callback){
 			opacity: "0"
 		}, 500);
 
-		// $(imgObj).attr("src"); // Set to new card img
+		$(imgObj).attr("src", card_backgrounds[newcard.bg % card_backgrounds.length]); // Set to new card img
 		$(imgObj).animate({
 			opacity: "1"
 		}, 500);
@@ -478,29 +487,109 @@ function animCoinsToPlayer(coins, playerID, callback, endingCallback){
 function CHEATERALERT(playerID){
 	console.log("player " + players[playerID].name + " cheated!");
 }
+function random(lower, upper){
+	// [inclusive, exclusive]
+	return Math.floor(Math.random() * (upper - lower)) + lower;
+}
 
 // GAME MANAGER
 var GameManager = function(){
 	this.currentTurnID = -1; // represents the playerID of current turn's player
 	this.totalTurns = 0;
 
-	this.nextTurn = function(){
-		this.totalTurns += 1;
-		$("#pdata-"+this.currentTurnID).removeClass("current-turn");
-		this.currentTurnID += 1;
-		this.currentTurnID = this.currentTurnID < players.length ? this.currentTurnID : 0;
-		$("#pdata-"+this.currentTurnID).addClass("current-turn");
-		this.playerTurn(this.currentTurnID);
+	this.broadcastData = function(mask){
+		// broadcast data to all player instances so that they are up to date
+		// mask : bitmask representing what to send
+		// 0b00001 - players info
+		// 0b00010 - board info
+		// ob00100 - currency info
+		// 0b01000 - remaining cards in deck info
+		// 0b10000 - card backgrounds
+		var data = {}
+		if (0b1 & mask){ data.players = players;}
+		if (0b10 & mask){ data.board = board;}
+		if (0b100 & mask){ data.currency = currency;}
+		if (0b1000 & mask){ data.deck = deck;}
+		if (0b10000 & mask){ data.card_backgrounds = card_backgrounds;}
+		socket.sendEvent("BROADCAST", data);
+	}
+	this.initializeBoard = function(){
+		board = [[],[],[]];
+		for(var i = 0; i < 4; i++){
+			board[0].push(deck[0].splice(random(0, deck[0].length), 1)[0]);
+			board[1].push(deck[1].splice(random(0, deck[1].length), 1)[0]);
+			board[2].push(deck[2].splice(random(0, deck[2].length), 1)[0]);
+		}
 	}
 	this.playerTurn = function(playerID){
-		// Tell player that it's their turn, now wait for action from player.
+		// Notify player that it's their turn, now wait for action from player.
+		socket.sendEvent("PLAYER_TURN", playerID);
+	}
+	this.nextTurn = function(){
+		$("#pdata-"+this.currentTurnID).removeClass("current-turn");
+		this.checkPlayerWinCondition(playerID);
+
+		var iter = 0;
+		while (players[this.currentTurnID + 1].win && iter < players.length){
+			this.currentTurnID += 1; iter += 1;
+			this.currentTurnID = this.currentTurnID < players.length ? this.currentTurnID : 0;
+		}
+		if (iter >= players.length){
+			this.gameOver();
+		}
+		else{
+			$("#pdata-"+this.currentTurnID).addClass("current-turn");
+			this.playerTurn(this.currentTurnID);
+		}
+		if (this.currentTurnID == 0) this.totalTurns += 1;
+	}
+	this.gameOver = function(){
+		$("#gameover").removeClass("hidden");
+		var places = [[],[],[],[]];
+		var place = 0;
+		players.sort((a, b) => (a.won ? a.won : 999999) - (b.won ? b.won : 999999));
+
+		for (var i = 0; i < players.length; i++){
+			var p1 = players[i];
+			places[place].push(p1.name);
+
+			if (i == players.length - 1) break;
+
+			var p2 = players[i + 1];
+			if(p1.won != p2.won){
+				place += 1;
+			}
+		}
+
+		print(places);
+		for (var i in places){
+			i = parseInt(i);
+			if (places[i].length == 0){continue;}
+
+			var html = places[i].join(", ");
+			$("#gameover #place"+(i+1)).closest("li").removeClass("hidden");
+			$("#gameover #place"+(i+1)).html(html);
+		}
+	}
+	this.checkPlayerWinCondition = function(playerID){
+		if (players[playerID].vp >= 15){
+			players[playerID].won = this.totalTurns;
+			$("#pdata-"+playerID).addClass("winner");
+			return true;
+		}
+		return false;
 	}
 	this.onReceivePlayerAction = function(actionType, actionData){
+		if (this.currentTurnID != actionData.playerID){
+			CHEATERALERT(actionData.playerID);
+			return;
+		}
 		// This func is called when user performs an action
 		switch (actionType){
 			case "PICK_COIN":
 				var delay = 0;
 				var coins = actionData.coins
+				inAnimation = true;
 				for(var i in coins){
 					setTimeout(function(i, p, callback) {
 						currency[i].remaining -= 1;
@@ -513,14 +602,19 @@ var GameManager = function(){
 					});
 					delay += 600;
 				}
+				setTimeout(()=>{
+					inAnimation = false;
+					this.nextTurn();
+				}, delay);
 				break;
 			case "PICK_CARD":
 				var card = board[actionData.tier-1][actionData.index];
 				var p = players[actionData.playerID];
 				var boughtReserve = -1;
+				var tier = actionData.tier;
 
 				if (p.reserved.length > 0){
-					if (0 == p.reserved.reduce((accu, cur) => accu |= (cur.tier == actionData.tier && cur.tier == actionData.index), false))
+					if (0 == p.reserved.reduce((accu, cur) => accu |= (cur.tier == tier && cur.tier == actionData.index), false))
 						break;
 				}
 
@@ -542,15 +636,20 @@ var GameManager = function(){
 				if (affordable){
 					if (boughtReserve >= 0){
 						p.reserved.splice(boughtReserve, 1);
-						$($("#card-t" + actionData.tier +" .sCard.playable")[actionData.index]).removeClass("reserved");
+						$($("#card-t" + tier +" .sCard.playable")[actionData.index]).removeClass("reserved");
 					}
 					
 					p.currency[card.grant].perm += 1;
-
-					playerPickUpCard(actionData.playerID, actionData.tier, actionData.index, 
-						function(playerID, tier, index){
+					var newcard = deck[tier-1].length > 0 ? deck[tier-1].splice(random(0,deck[tier-1].length),1)[0] : {};
+					inAnimation = true;
+					playerPickUpCard(actionData.playerID, tier, actionData.index, newcard,
+						(playerID, tier, index, newcard) => {
+							board[tier-1][actionData.index] = newcard;
 							updatePlayerUI();
 							updateCurrPoolUI();
+							updateBoardUI();
+							inAnimation = false;
+							this.nextTurn();
 						});
 				}
 				break;
@@ -563,16 +662,26 @@ var GameManager = function(){
 
 				currency[currency_ind["token"]].remaining -= 1;
 				updateCurrPoolUI();
-				animTokenToCard(actionData.tier, actionData.index, function(tier, index){
+					
+				inAnimation = true;
+
+				animTokenToCard(actionData.tier, actionData.index, (tier, index) => {
+					inAnimation = false;
+					this.nextTurn();
 				});
 
 				break;
 		}
+
 	}
 }
 
 function s(i){
+	gameManager.currentTurnID = 0;
 	switch(i){
+		case -2:
+			gameManager.onReceivePlayerAction("PICK_COIN", {coins:[0,0,1,1,2,2,3,3,4,4], playerID: 0});
+			break;			
 		case -1:
 			gameManager.onReceivePlayerAction("PICK_COIN", {coins:[0,0], playerID: 0});
 			break;

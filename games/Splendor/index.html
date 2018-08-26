@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Splendor</title>
+	<meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86">
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="/games/Splendor/css/style.css">
 </head>
@@ -12,8 +13,22 @@
 	<script src="/js/clientsocket.js"></script>
 	<script type="text/javascript">
 	</script>
+	<script src="/games/Splendor/js/global.js"></script>
 	<script src="/games/Splendor/js/frontend.js"></script>
-	
+
+	<div id="gameover" class="absolute-center hidden">
+		<div>
+			<h2>Game over</h2>
+			<hr>
+			<ul class="stats">
+				<li class="hidden"><h2>1st: <span id="place1"></span></h2></li>
+				<li class="hidden"><h3>2nd: <span id="place2"></span></h3></li>
+				<li class="hidden"><h4>3rd: <span id="place3"></span></h4></li>
+				<li class="hidden"><h5>4th: <span id="place4"></span></h5></li>
+			</ul>
+		</div>
+	</div>
+
 	<div id="game-frame">		
 		<div class="container card-container" style="">
 			<div class="row" id="card-t3">
