@@ -12,31 +12,31 @@ body{
 .row{
 	margin: 0.2rem 1rem;
 }
-.card{
-	width: 24%; display: inline-block; position: relative;
+.sCard{
+	width: 24%; display: inline-block; position: relative; margin: 2px;
 }
-.card.disabled{
+.sCard.disabled{
 	opacity: 0.3;
 }
-.card img{
+.sCard img{
 	width: 100%;
 }
-.card .overlay{
+.sCard .overlay{
 	/*position: absolute; top: 0; left:0;*/
 }
-.card .overlay .top{
+.sCard .overlay .top{
 	width: 100%; position: absolute; top:0; left: 0; height: 4rem;
 	background: rgba(0,0,0,0.8)
 }
-.card .overlay .vp{
-	margin: 1rem; display: inline-block;
+.sCard .overlay .vp{
+	margin: 0.5rem; display: inline-block; color: white;
 	text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
     -1px 1px 0 #000,
     1px 1px 0 #000;
 }
-.card .overlay .top img{width: 4rem; position: absolute; right: 0; top: 0;}
+.sCard .overlay .top img{width: 4rem; position: absolute; right: 0; top: 0;}
 #currency-pool{
 	position: absolute; bottom: 1rem; left: 0; width: 100%; height: 5rem; 
 	margin: 1rem;
@@ -47,9 +47,42 @@ body{
 #currency-pool .currency img{
 	width: 100%;
 }
+#currency-pool .currency .picked{
+	text-align: center; position: absolute; width: 100%; bottom: 110%;
+	border-bottom: 1px solid white; transition: 0.5s ease; opacity: 0;
+}
+#currency-pool .currency .picked.selected{
+	opacity: 1;
+}
 
-#not-your-turn{
+#not-your-turn, #confirm-box{
 	position: fixed; width: 100%; height: 100%; background: rgba(0,0,0,0.9);
 	display: flex; align-items: center; justify-content: center;
 	top: 0; left: 0;
+}
+/*#confirm-box{background: none;}*/
+#confirm-box>div{
+	width: 20rem; background: white; border-radius: 0.5rem; color: black; text-align:center;
+}
+#confirm-box .btn{width: 48%; display: inline-block; border-top: 1px solid lightgrey;}
+#confirm-box .sCard .top .vp{
+	position: absolute; left: 1rem;
+}
+#confirm-box .sCard .overlay .costs{
+	position: absolute; left: 0.2rem; bottom: 0.2rem;
+}
+#confirm-box .sCard .overlay .costs>div{
+	width: 2.5rem; height: 2.5rem;overflow: hidden; display: flex; align-items: center; justify-content: center;
+	border-radius: 50%; color: white; border: 2px solid white; margin: 0.2rem;
+}
+#confirm-box .sCard .overlay .costs>div img{
+	width: 6rem;
+}
+#confirm-box .sCard .overlay .costs>div .cost{
+	position: absolute;
+	text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }

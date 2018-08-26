@@ -58,13 +58,11 @@ var Game = function(){
 		this.sendEventToMain("PLAYER_DISCONNECT", this.IDLUT.indexOf(playerID));
 	}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
-		// use "disconnect" for user disconnect event
-		console.log("received " + event + " from player " + playerID + " with payload " + payload);
-		var trueID = this.IDLUT[playerID];
-		this.sendEventToPlayers(this.IDLUT, event, payload);
+		if (event == "PICK_CARD" || event == "PICK_COIN" || event == "RESERVE_CARD"){
+			this.sendEventToMain(event, payload);
+		}
 	}
 	this.onReceiveEventFromMain = function(event, payload){
-		// console.log("received " + event + " from main" + " with payload " + payload);
 		switch(event){
 			case "PLAYER_TURN":
 				// Send to specific player
