@@ -195,26 +195,31 @@ function updateTierCardsUI(tier, cTemplate){
 	var $cards = $("#card-t"+tier+" .sCard.playable");
 	for (var i in board[tier-1]){
 		var card = board[tier-1][i];
-		$($cards[i]).html(cTemplate);
-		// update card BG
-		$($cards[i]).find(".bg").attr("src", card_backgrounds[card.bg % card_backgrounds.length]);
-		// update card VP
-		if(card.vp == 0){
-			$($cards[i]).find(".vp").addClass("hidden");
-		}else{
-			$($cards[i]).find(".vp").removeClass("hidden").html(card.vp);
+		if (Object.keys(card).length == 0){
+			$($cards[i]).css("visibility", "hidden");
 		}
-		// update card granting bonus
-		$($cards[i]).find(".grant").attr("src", currency[card.grant].img);
-		// update the cost bubbles
-		$costs = $($cards[i]).find(".cost-cont>div");
-		for (var j in card.cost){
-			var c = card.cost[j];
-			if (c == 0){
-				$($costs[j]).addClass("hidden");
+		else{
+			$($cards[i]).html(cTemplate);
+			// update card BG
+			$($cards[i]).find(".bg").attr("src", card_backgrounds[card.bg % card_backgrounds.length]);
+			// update card VP
+			if(card.vp == 0){
+				$($cards[i]).find(".vp").addClass("hidden");
 			}else{
-				$($costs[j]).removeClass("hidden").find("img").attr("src", currency[j].img);
-				$($costs[j]).find(".cost").html(c);
+				$($cards[i]).find(".vp").removeClass("hidden").html(card.vp);
+			}
+			// update card granting bonus
+			$($cards[i]).find(".grant").attr("src", currency[card.grant].img);
+			// update the cost bubbles
+			$costs = $($cards[i]).find(".cost-cont>div");
+			for (var j in card.cost){
+				var c = card.cost[j];
+				if (c == 0){
+					$($costs[j]).addClass("hidden");
+				}else{
+					$($costs[j]).removeClass("hidden").find("img").attr("src", currency[j].img);
+					$($costs[j]).find(".cost").html(c);
+				}
 			}
 		}
 	}
@@ -231,7 +236,7 @@ function getCurrPoolUITemplate(){
 }
 function updateCurrPoolUI(cpTemplate){
 	cpTemplate = typeof cpTemplate == "undefined" ? currencyPoolUITemplate : cpTemplate;
-	var $currs = $("#currency-pool>div");
+	var $currs = $("#currency-pool .currency");
 	for (var i = 0; i < $currs.length; i++){
 		var c = $currs[i];
 		var currname = $(c).find("img").attr("name");
@@ -330,7 +335,7 @@ function animFillCardSlotFromDeck(imgObj, tier, newcard, callback){
 	var $card = $(imgObj).closest(".sCard.playable");
 	$card.css("opacity", "0");
 
-	var deckHasMoreCard = true;
+	var deckHasMoreCard = deck[tier-1].length > 0;
 
 	var $tier = $("#card-t"+tier);
 	var $backdeck = $tier.find(".backdeck");
@@ -370,17 +375,19 @@ function animFillCardSlotFromDeck(imgObj, tier, newcard, callback){
 		}, 500);
 
 		$(imgObj).attr("src", card_backgrounds[newcard.bg % card_backgrounds.length]); // Set to new card img
-		$(imgObj).animate({
-			opacity: "1"
-		}, 500);
-		$card.animate({
-			opacity: "1"
-		}, 500);
+		if (Object.keys(newcard).length > 0){
+			$(imgObj).animate({
+				opacity: "1"
+			}, 500);
+			$card.animate({
+				opacity: "1"
+			}, 500);
+		}
 
 	}, 500);
 	setTimeout(() => {
-		if (deckHasMoreCard) $backdeck.html(origHtml);
-		else $backdeck.html("");
+		$backdeck.html(origHtml);
+		if (!deckHasMoreCard) $backdeck.css("visibility", "hidden");
 	}, 1000);
 }
 
@@ -581,9 +588,9 @@ var GameManager = function(){
 		do{
 			this.currentTurnID += 1; iter += 1;
 			this.currentTurnID = this.currentTurnID < players.length ? this.currentTurnID : 0;
-		} while (players[this.currentTurnID].won && iter < players.length - 1)
+		} while (players[this.currentTurnID].won && iter < players.length)
 		
-		if (iter >= players.length - 1){
+		if (iter >= players.length){
 			updatePlayerUI();
 			this.gameOver();
 		}

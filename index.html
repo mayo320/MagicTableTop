@@ -22,7 +22,7 @@
 			.host .host-txt{display: inline;}
 			.disconnected .host-txt{display: none;}
 		</style>
-		<script src="js/jquery.js"></script>
+		<script src="/js/jquery.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 
 		<h1>Main Menu</h1>
@@ -38,6 +38,7 @@
 		<script type="text/javascript">
 			var players = [];
 			var games = {{GAMES}};
+			var pdata = {{PLAYERDATA}};
 			socket = io("/main");
 
 			function addPlayer(p){
@@ -58,6 +59,13 @@
 					$p.addClass("disconnected");
 				}
 			}
+			function setHost(pID){
+				$players = $("#playerlist li");
+				$players.removeClass("host");
+				if (pID < $players.length){
+					$($players[pID]).addClass("host");
+				}
+			}
 
 			function playGame(gameName){
 				socket.emit("ev-playgame", gameName);
@@ -73,12 +81,8 @@
 				window.location.href = gameURL;
 			});
 			socket.on("ev-sethost", function(pID){
-				$players = $("#playerlist li");
-				$players.removeClass("host");
-				if (pID < $players.length){
-					$($players[pID]).addClass("host");
-				}
-			})
+				setHost(pID);
+			});
 
 			for(var i = 0; i < games.length; i++){
 				var g = games[i];
@@ -89,6 +93,17 @@
 				li += " <button onclick='playGame(\""+g.name+"\")'> PLAY </button>"
 				li += "</li>";
 				$("#games").append(li);
+			}
+
+			for(var i in pdata){
+				var p = pdata[parseInt(i)];
+				addPlayer(p);
+				if (p.ishost){
+					setHost(p.id);
+				}
+				if (!p.connected){
+					removePlayer(p);
+				}
 			}
 		</script>
 	</body>

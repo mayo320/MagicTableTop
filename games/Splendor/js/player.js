@@ -49,7 +49,7 @@ function gameOver(){
 	$($btns[1]).attr("onclick", "restartgame()").find("h4").html("Restart");
 }
 function mainmenu(){
-	socket.toMainMenu();
+	socket.returnHome();
 }
 function restartgame(){
 	socket.restartGame();
@@ -76,25 +76,38 @@ function getCardUITemplate(){
 	return $(".sCard.template").removeClass("template").html();
 }
 function updateTierUI(tier){
-	$cards = $("#card-t" + tier + " .sCard");
+	var $cards = $("#card-t" + tier + " .sCard");
+	var exists = [];
+
+	$.each($cards, function(i,o){
+		if (Object.keys(board[tier-1][i]).length == 0){
+			$(o).css("visibility", "hidden");
+			exists.push(false);
+		}
+		else{
+			exists.push(true);
+			if (canAffordCard(board[tier-1][i])){
+				$(o).removeClass("disabled");
+			}else{
+				$(o).addClass("disabled");
+			}
+			$(o).attr("tier", tier);
+			$(o).attr("index", i);
+			$(o).attr("onclick", "buyCard(this)");
+		}
+	});
+
 	$cards.find(".vp").html(function(i){
+		if (!exists[i]) return "";
 		return board[tier-1][i].vp == 0 ? "" : board[tier-1][i].vp;
 	});
 	$cards.find(".grant").attr("src", function(i){
-		return currency[board[tier-1][i].grant].img;				
+		if (!exists[i]) return "";
+		return currency[board[tier-1][i].grant].img;			
 	});
 	$cards.find(".bg").attr("src", function(i){
+		if (!exists[i]) return "";
 		return card_backgrounds[board[tier-1][i].bg % card_backgrounds.length];
-	});
-	$.each($cards, function(i,o){
-		if (canAffordCard(board[tier-1][i])){
-			$(o).removeClass("disabled");
-		}else{
-			$(o).addClass("disabled");
-		}
-		$(o).attr("tier", tier);
-		$(o).attr("index", i);
-		$(o).attr("onclick", "buyCard(this)");
 	});
 }
 function updateBoardUI(){

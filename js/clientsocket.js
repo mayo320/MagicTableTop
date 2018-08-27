@@ -7,6 +7,10 @@ var MTSocket = function(soc_type){
 		console.log("Restarting game...");
 		location.reload();
 	});
+	socket.on("ev-returnhome", (url) => {
+		console.log("Returning home...");
+		window.location.href = url;
+	});
 
 	this.onReceiveEvent = function(event, callback){
 		socket.on(event, (payload) => callback(payload));
@@ -21,6 +25,7 @@ var MTSocket = function(soc_type){
 		socket.emit("ev-restartgame", true);
 	}
 	this.returnHome = function(){
-
+		console.log("Requesting to return home");
+		socket.emit("ev-returnhome", true);
 	}
 }

@@ -80,9 +80,15 @@ ul{
 .card-container .row{
 	margin:0.1rem 0;
 }
-#currency-pool{display: flex; align-items: center; margin-top:1rem;}
+#currency-pool{
+	display: flex; align-items: center; justify-content: center;
+	position: fixed; left: 0; top: 0; height: 100%;
+}
 #currency-pool img{
 	width: 100%; border-radius: 25%;
+}
+#currency-pool .currency{
+	width: 10rem; position: fixed; height: 10rem; margin: auto; top: 0; bottom: 0;
 }
 
 #player-data-container{

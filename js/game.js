@@ -96,19 +96,6 @@ var Game = function(gameObject, session){
 		this.playersIO = io.of("/player");
 		this.mainIO = io.of("/main");
 
-		io.of("/").in(this.name).on("connection", (socket) => {
-			socket.on("ev-restartgame", (payload) => {
-				console.log("Restarting game " + this.name + "...");
-				io.of("/").in(this.name).emit("ev-restartgame", true);
-			});
-			socket.on("ev-endgame", (payload) => {
-				this.endGame();
-			});
-			socket.on("ev-returnHome", (payload) => {
-				this.endGame();
-			});
-		});
-
 		this.mainIO.in(this.name).on("connection", (socket) => {
 			socket.use((packet, next) => {
 				this.gameObject.onReceiveEventFromMain(packet[0], packet[1]);

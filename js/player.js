@@ -7,6 +7,7 @@ var Player = function(){
 	this.socket = null;
 	this.socketip = "0.0.0.0";
 	this.host = false;
+	this.automaticRejoin = false; // if connected, automatically simulate ev-playerjoin event
 
 	this.connect = function(){
 		this.connected = true;

@@ -25,6 +25,7 @@ global.addresses = global.addresses.length == 0 ? ["IP-TO-MAGIC-TABLETOP"] : glo
 var App = function(){
 	var config;
 	var games = [];
+	var currentGame;
 	var playersIO;
 	var mainIO;
 
@@ -72,6 +73,17 @@ var App = function(){
 				}
 				html = html.replace("{{GAMES}}", JSON.stringify(json));
 
+				var pdata = [];
+				pdata = session.players.map((p, i) => {return {
+						name: p.name, 
+						socketid: p.socket.id,
+						clientip: p.socketip,
+						connected: p.connected,
+						id: p.id,
+						ishost: p.host
+					};});
+				html = html.replace("{{PLAYERDATA}}", JSON.stringify(pdata));
+
 				res.send(html);
 			}else{
 				res.send("<h1>HEY! This is not the Magic Tabletop??</h1>");
@@ -110,6 +122,7 @@ var App = function(){
 
 		if (game != null){
 			console.log("Starting game " + gameName + "...");
+			currentGame = game;
 			game.setupHTML(app);
 			game.setupSocketIO(io);
 			game.startGame();
@@ -144,6 +157,20 @@ var App = function(){
 		}
 	}
 
+	var rejoinPlayer = function(player){
+		player.connect();
+		mainIO.emit("ev-playerjoin", {
+			name: player.name, 
+			socketid: player.socket.id,
+			clientip: player.socketip,
+			connected: player.connected,
+			id: player.id,
+			ishost: player.host
+		});
+		player.socket.emit("ev-joined", player.id);
+		updateLobbyHost();
+	}
+
 	/* setupSocketIO(io)
 	 * Set up sockets
 	 *
@@ -161,6 +188,7 @@ var App = function(){
 			if (p != null){
 				// Updates the socket for reconnects
 				p.update(socket);
+				rejoinPlayer(p);
 			}
 
 			socket.on("ev-playerjoin", function(playername){
@@ -174,14 +202,7 @@ var App = function(){
 				}
 
 				if (p != null){
-					p.connect();
-					mainIO.emit("ev-playerjoin", {
-						name: p.name, 
-						socketid: p.socket.id,
-						clientip: p.socketip
-					});
-					socket.emit("ev-joined", p.id);
-					updateLobbyHost();
+					rejoinPlayer(p);
 				}
 			});
 
@@ -197,6 +218,23 @@ var App = function(){
 						mainIO.emit("ev-error", "Game \"" + gameName + "\" does not exist.");
 					}
 				}
+			});
+
+			socket.on("ev-restartgame", function(payload){
+				console.log("Restarting game " + currentGame.name + "...");
+				mainIO.emit("ev-restartgame", true);
+				playersIO.emit("ev-restartgame", true);
+			});
+			socket.on("ev-returnhome", function(payload){
+				console.log("Returning home...");
+				currentGame.endGame();
+				currentGame = undefined;
+				for(var i in session.players){
+					var p = session.players[parseInt(i)];
+					if (p.connected) p.automaticRejoin = true;
+				}
+				mainIO.emit("ev-returnhome", `http://${config.address}:${config.port}/main`);
+				playersIO.emit("ev-returnhome", `http://${global.addresses[0]}:${config.port}`);
 			});
 
 			socket.on("disconnect", function(){
