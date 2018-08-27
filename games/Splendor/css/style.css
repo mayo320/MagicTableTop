@@ -145,3 +145,34 @@ hr{ border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;}
 	width: 20rem; height: 20rem; text-align: center; background: rgba(0,0,0,0.9);
 	border-radius: 2rem;
 }
+
+#nobles img{
+	width: 100%;
+}
+#nobles .noble{
+	overflow: hidden; border-radius: 1rem; width: 12rem;  margin-top: 0.9rem; 
+	position: relative; color: white;
+
+}
+#nobles .noble .overlay{
+	text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+#nobles .noble .overlay .left{
+	position: absolute; left: 0; top:0 ;height: 100%; width: 3.5rem; 
+	background: rgba(255,255,255,0.7); text-align: center;
+}
+#nobles .noble .overlay .left .req-cont{
+	width: 1.7rem; height: 2.2rem; display: flex; align-items: center; 
+	justify-content: center; overflow: hidden; border: 2px solid white;
+	border-radius: 0.3rem; margin: 0.2rem auto; 
+}
+#nobles .noble .overlay .left .req-cont .bg{
+	width: 10rem;
+}
+#nobles .noble .overlay .left .req-cont .req{
+	position: absolute;
+}

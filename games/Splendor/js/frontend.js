@@ -87,13 +87,18 @@ var players = [
 		]
 	}
 ];
+
 var card_backgrounds = [
 	"https://i.imgur.com/zjESCeZ.jpg",
 	"https://i.imgur.com/KIjjoVe.jpg",
 	"https://i.imgur.com/pgid27X.jpg",
 	"https://i.imgur.com/POh96lW.jpg",
 	"https://i.imgur.com/u5GPs5q.jpg",
-]
+];
+var noble_backgrounds = [
+	"https://i.imgur.com/QEN8oOa.jpg",
+	"https://i.imgur.com/TtbgoNS.jpg",
+];
 var board = [
 	[
 		{vp: 0, grant: 2, bg: 1, cost:[2,1,1,0,1]},
@@ -118,6 +123,7 @@ var board = [
 var playerUITemplate = "";
 var cardUITemplate = "";
 var currencyPoolUITemplate = "";
+var nobleUITemplate = "";
 var inAnimation = false;
 
 $(document).ready(function(){
@@ -150,6 +156,9 @@ $(document).ready(function(){
 
 	currencyPoolUITemplate = getCurrPoolUITemplate();
 	updateCurrPoolUI(currencyPoolUITemplate);
+
+	nobleUITemplate = getNobleUITemplate();
+	updateNobleUI(nobleUITemplate);
 
 	gameManager.nextTurn();
 
@@ -252,6 +261,44 @@ function updateCurrPoolUI(cpTemplate){
 	}
 }
 
+function getNobleUITemplate(){
+	return $(".noble.template").removeClass("template").html();
+}
+function updateNobleUI(template){
+	template = typeof template == "undefined" ? nobleUITemplate : template;
+	var numNobles = players.length + 1;
+ 	while(nobles.length > numNobles){
+ 		nobles.splice(random(0,nobles.length), 1);
+ 	}
+
+	$nobles = $("#nobles .noble");
+	$.each($nobles, function(i, noble){
+		if (i < numNobles){
+			if(Object.keys(nobles[i]).length == 0){
+				$(noble).css("visibility", "hidden");
+			}
+			else{
+				$(noble).html(template);
+				$(noble).find(".noble-bg").attr("src", noble_backgrounds[nobles[i].bg % noble_backgrounds.length]);
+				$(noble).find(".vp").html(nobles[i].vp);
+				var $reqs = $(noble).find(".req-cont");
+				var c = 0;
+				for(var k = 0; k < nobles[i].reqs.length; k++){
+					var r = nobles[i].reqs[k];
+					if (r != 0 && c < $reqs.length){
+						$($reqs[c]).removeClass("hidden");
+						$($reqs[c]).find(".bg").attr("src", currency[k].img);
+						$($reqs[c]).find(".req").html(r);
+						c += 1;
+					}
+				}
+			}
+		}else{
+			$(noble).parent().remove();
+		}
+	});
+}
+
 // ACTION FUNCTIONs
 function playerPickUpCard(playerID, tier, index, newcard, callback){
 	var imgs = $("#card-t"+tier+" .sCard.playable .bg");
@@ -263,12 +310,39 @@ function playerPickUpCard(playerID, tier, index, newcard, callback){
 		}, 1200);
 	}
 
+	var extraDelay = checkNobleReq(playerID);
+
 	if (typeof callback === "function"){
 		setTimeout(function(p, t, i, n) {
 			callback(p, t, i, n);
-		}, 2300, playerID, tier, index, newcard);
+		}, 2300 + extraDelay, playerID, tier, index, newcard);
 	}
+}
 
+function checkNobleReq(playerID){
+	var delay = 0;
+	for(var i in nobles){
+		if (Object.keys(nobles[i]).length != 0){
+			var t = nobles[i].reqs.map((x, i) => players[playerID].currency[i].perm >= x);
+			var ret = t.reduce((accu, cur) => cur & accu, true); // 1 or 0
+			if (ret){
+				setTimeout(function(i, p){
+					animNobleToPlayer(i, p);
+					players[p].settlers += 1;
+					players[p].vp += nobles[i].vp;
+				}, delay, i, playerID);
+				delay += 1000;
+				setTimeout(function(i, p){
+					updatePlayerUI();
+					nobles[i] = {};
+				}, delay, i, playerID)
+			}
+		}
+	}
+	setTimeout(function(){
+		updateNobleUI();
+	}, delay+100);
+	return delay;
 }
 
 // ANIMATION FUNCTIONS
@@ -501,6 +575,16 @@ function animCoinsToPlayer(coins, playerID, callback, endingCallback){
 	if (typeof endingCallback === "function"){
 		setTimeout(endingCallback, delay + 100);
 	}
+}
+
+function animNobleToPlayer(nobleIndex, playerID){
+	$noble = $($("#nobles .noble")[nobleIndex]);
+	animCardToPlayer($noble.find(".noble-bg")[0], playerID);
+	$noble.find(".overlay").addClass("hidden");
+
+	setTimeout(() => {
+		
+	}, 1200);
 }
 
 function CHEATERALERT(playerID){
