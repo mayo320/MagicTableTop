@@ -1,0 +1,30 @@
+body{
+	background: black; color: white; text-align: center;
+}
+.hidden{
+	display: none;
+}
+hr{
+	border-top: 1px solid rgba(255,255,255,0.8); width: 100%;
+}
+ul{
+	padding: 0;
+}
+li{list-style: none;}
+
+#joining-page{
+	margin-top: 8rem;
+}
+#joined-page{
+	margin-top: 2rem;
+}
+
+#gamelist{
+	padding: 1rem;
+}
+#gamelist ul{
+	overflow-y: scroll;
+}
+#gamelist ul li{
+	margin: 0.5rem 0; padding: 0.5rem; background: lightgrey; color: black;
+}

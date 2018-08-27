@@ -17,6 +17,13 @@ var config = {
 			
 			config: [ // optional
 			]
+		},
+		{
+			name: "Pong", // required - must match folder name inside "games" folder
+			disabled: false, // optional
+			
+			config: [ // optional
+			]
 		}
 	]
 };

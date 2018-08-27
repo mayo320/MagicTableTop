@@ -12,6 +12,9 @@ var Game = function(){
 	this.mappableFolders = ["js", "css"];
 
 	// optional	fields
+	// for cover art on main hub
+	this.cover_img = "https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/BoardGameSplendorLogoFairUse.jpg/220px-BoardGameSplendorLogoFairUse.jpg",
+	
 	this.players = {};
 	this.IDLUT = []; // index: playerID in front end; value at index: playerID in backend
 

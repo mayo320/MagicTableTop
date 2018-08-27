@@ -159,15 +159,16 @@ var App = function(){
 
 	var rejoinPlayer = function(player){
 		player.connect();
-		mainIO.emit("ev-playerjoin", {
+		var pinfo = {
 			name: player.name, 
 			socketid: player.socket.id,
 			clientip: player.socketip,
 			connected: player.connected,
 			id: player.id,
 			ishost: player.host
-		});
-		player.socket.emit("ev-joined", player.id);
+		};
+		mainIO.emit("ev-playerjoin", pinfo);
+		player.socket.emit("ev-joined", pinfo);
 		updateLobbyHost();
 	}
 

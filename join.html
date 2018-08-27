@@ -4,23 +4,29 @@
 		<meta charset="UTF-8">
 		<title>Joining</title>
 		<meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86">
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="/css/playerjoin.css">
 	</head>
 	<body>
-		<style type="text/css">
-			.hidden{
-				display: none;
-			}
-		</style>
 		<script src="js/jquery.js"></script>
+		<script src="js/bootstrap.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
+
 		<script type="text/javascript">
+			var print = console.log;
 			var playerID = -1;
 			var socket = io("/player");
+			var joined = false;
 			socket.on("ev-playgame", function(gameURL){
 				window.location.href = gameURL;
 			});
-			socket.on("ev-joined", function(pID){
-				playerID = pID;
+			socket.on("ev-joined", function(pinfo){
+				print(pinfo);
+				$("#joining-page").addClass('hidden');
+				joined = true;
+				var $joined = $("#joined-page");
+				$joined.removeClass('hidden');
+				$joined.find(".pname").html(pinfo.name);
 			});
 			socket.on("ev-sethost", function(flag){
 				if (flag) $("#gamelist").removeClass("hidden");
@@ -29,30 +35,56 @@
 
 
 			function avc(){
-				socket.emit("ev-playerjoin", document.getElementById("playername").value);
+				var v = joined ? $("#joined-page .playername").val() : $("#joining-page .playername").val();
+				if (v.length < 1){
+					alert("Your name is too short!");
+					return;
+				}
+				socket.emit("ev-playerjoin", v);
 			}
 			function playGame(gameName){
 				socket.emit("ev-playgame", gameName);
 			}
 		</script>
 
-		<h1>Hello Player</h1>
-		<div>joinging page</div>
-		<input type="text" id="playername">
-		<button onclick="avc()">Join</button>
-		<div id="gamelist" class="hidden">
-			<h3>Hi Host</h3>
-			<p>When ever everyone is ready, click on a game to start the game.</p>
-			<ul></ul>
+		<div id="joining-page" class="">
+			<h1>Hello Player</h1> <hr>
+			<h3>What is your name?</h3>
+			<input type="text" class="playername" maxlength="20">
+			<div> <hr>
+			<button class="btn" onclick="avc()"><h3>Join</h3></button>
+			</div>
 		</div>
+
+		<div id="joined-page" class="hidden">
+			<h1>Hello <span class="pname"></span></h1> <hr>
+			<h3>Change your name?</h3>
+			<input type="text" class="playername" maxlength="20">
+			
+			<button class="btn" onclick="avc()">Change</button>
+					
+			<hr>
+		</div>
+
+
+
+		<div id="gamelist" class="hidden">
+			<h3>You are the Host</h3>
+			<h5>When everyone is ready, click on a game to start the game.</h5>
+			<hr>
+			<ul>
+			</ul>
+		</div>
+
+
 		<script type="text/javascript">
 			var games = {{GAMES}};
 			
 			var $ul = $("#gamelist ul");
 			for(var i in games){
 				var g = games[i];
-				var li = "<li>";
-				li += "<button onclick='playGame(\""+g.name+"\")'>" + g.name + "</button>";
+				var li = "<li onclick='playGame(\""+g.name+"\")'>";
+				li += "<h4>" + g.name + "</h4>";
 				li += "</li>";
 				$ul.append(li);
 			}

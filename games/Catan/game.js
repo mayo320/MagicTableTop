@@ -9,9 +9,14 @@ var Game = function(){
 	this.mainHTML = "index.html";
 	this.playerHTML = "player.html";
 
+	this.mappableFolders = ["js", "css"];
+
 	// optional	fields
+	this.cover_img = "https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/Catan-2015-boxart.jpg/250px-Catan-2015-boxart.jpg"
+	
 
 	// required functions
+	this.initPlayers = function(players){}
 	this.initMainHTML = function(html){
 		return html;
 	}
@@ -20,18 +25,23 @@ var Game = function(){
 	}
 
 	this.sendEventToPlayers = function(players, event, payload){
-		// players = list of int representing player id
+		// players = list of int representing player id (the p.id in initPlayers)
+		// leave this function empty (will be filled at run time)
 	}
 	this.sendEventToMain = function(event, payload){
-
+		// leave this function empty (will be filled at run time)
 	}
+	this.sendEventToAll = function(event, payload){
+		// leave this function empty (will be filled at run time)
+	}
+
+	// Fill these out
+	this.onPlayerConnect = function(playerID){}
+	this.onPlayerDisconnect = function(playerID){}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
 
 	}
 	this.onReceiveEventFromMain = function(event, payload){
-
-	}
-	this.init = function(){
 
 	}
 

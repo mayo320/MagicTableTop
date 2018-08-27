@@ -2,38 +2,58 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>Hello World!</title>
+		<title>Magic TableTop</title>
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="/css/mainhobby.css">
 	</head>
 	<body>
-		<style type="text/css">
-			.disconnected .pname{
-				text-decoration: line-through;
-			}
-			.dis-txt{
-				display: none;
-				color: grey;
-			}
-			.disconnected .dis-txt{
-				display: inline;
-			}
-			.host-txt{
-				display: none; color: orange;
-			}
-			.host .host-txt{display: inline;}
-			.disconnected .host-txt{display: none;}
-		</style>
 		<script src="/js/jquery.js"></script>
+		<script src="/js/bootstrap.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 
-		<h1>Main Menu</h1>
-		<p>Join the game by going to this url on your phone browser: 
-			<span style="font-weight: 900;">{{FULLURL}}</span></p>
-		<hr>
-		<h2>Players</h2>
-		<ul id="playerlist"></ul>
-		<hr>
-		<h2>Games</h2>
-		<ul id="games"></ul>
+		<div class="container">
+			<div class="row">
+				<div class="col-4">
+					<div class="row item" style="text-align: center;">
+						<div style="margin:auto;">
+							<h1>Magic TableTop!</h1><hr>
+							<h5>Visit this link on your phone: </h5>
+							<h4 style="border:1px solid white; padding: 0.5rem;">
+								{{FULLURL}}</h4>
+						</div>
+					</div>
+					<div class="row item">
+						<h2>Players</h2>
+						<ul id="playerlist" class="">
+							<li class="">
+								<h4 class="pname">Jack</h4>
+								<h5 class="host-txt">host</h5>
+								<h5 class="dis-txt">disconnected</h5>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-8">
+					<div class="item">
+						<h2>Games</h2>
+						<ul id="games" class="row">
+							<li class="col-4"  style="padding-top:1rem;">
+								<div class="game">
+									<img class="cover" src="">
+									<div class="overlay">
+										<h4 class="gname">Splendor</h4>
+										<h5 class="player_count">2 - 124 players</h5>
+										<h5 class="play_time">220+ min</h5>
+									</div>
+								</div>
+							</li>
+
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
 
 		<script type="text/javascript">
 			var players = [];
@@ -41,12 +61,20 @@
 			var pdata = {{PLAYERDATA}};
 			socket = io("/main");
 
+			var ptemplate = $("#playerlist").html();
+			$("#playerlist").html("");
+			var gtemplate = $("#games").html();
+			$("#games").html("");
+
 			function addPlayer(p){
 				console.log(p.name + " joined");
 				var $p = $("#playerlist li[ip='"+p.clientip+"']");
 				if ($p.length == 0){
 					players.push(p);
-					$("#playerlist").append("<li ip='"+p.clientip+"'><span class='pname'>"+p.name+"</span> <span class='dis-txt'> - disconnected</span> <span class='host-txt'> - host</span></li>");
+					$("#playerlist").append(ptemplate);
+					$p = $("#playerlist li:last");
+					$p.find(".pname").html(p.name);
+					$p.attr("ip", p.clientip);
 				}else{
 					$p.find(".pname").html(p.name);
 					$p.removeClass("disconnected");
@@ -86,13 +114,16 @@
 
 			for(var i = 0; i < games.length; i++){
 				var g = games[i];
-				var li = "<li>";
-				li += g.name;
-				li += " | " + g.player_count[0] + " - " + g.player_count[1] + " players";
-				li += " | " + g.playtime;
-				li += " <button onclick='playGame(\""+g.name+"\")'> PLAY </button>"
-				li += "</li>";
-				$("#games").append(li);
+				$("#games").append(gtemplate);
+				var $g = $("#games .game:last");
+				$g.find(".gname").html(g.name);
+				$g.find(".play_time").html(g.playtime);
+				$g.find(".player_count").html(g.player_count[0] + (g.player_count.length > 1 ? (" - " + g.player_count[1]) : "") + " players");
+				if (g.cover){
+					$g.find(".cover").attr("src", g.cover);
+				}else{
+					$g.find(".cover").attr("src", "");
+				}
 			}
 
 			for(var i in pdata){

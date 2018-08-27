@@ -10,6 +10,7 @@ var Game = function(gameObject, session){
 	this.home_path = path.resolve(global.root_path + "/games/" + this.name);
 	this.player_count = gameObject.player_count;
 	this.playtime = gameObject.playtime;
+	this.cover_img = gameObject.cover_img ? gameObject.cover_img : "";
 
 	this.playersIO;
 	this.mainIO;
@@ -145,6 +146,7 @@ var Game = function(gameObject, session){
 		json.name = this.name;
 		json.player_count = this.player_count;
 		json.playtime = this.playtime;
+		json.cover = this.cover_img;
 		return json;
 	}
 }
