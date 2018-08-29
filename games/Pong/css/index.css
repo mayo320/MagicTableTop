@@ -1,0 +1,30 @@
+body{
+	background: black; color: white;
+}
+#game-frame{
+	position: fixed; top: 1%; left: 1%; width: 98%; height: 98%;
+	border: 1px solid white;
+	display: flex; align-items: center; justify-content: center;
+}
+.mid-line{
+	border-left: 1px solid white; height: 100%;
+	opacity: 0.2;
+}
+
+#left, #right{
+	height: 20%; width: 2rem; background: white;
+	position: absolute;
+}
+#left{
+	left: 1rem;
+}
+#right{
+	right: 1rem;
+}
+#ball{
+	width: 2rem; height: 2rem; position: absolute; background: white;
+	border-radius: 50%;
+}
+.block{
+	position: absolute; background: red; z-index: 99;
+}

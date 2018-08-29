@@ -223,6 +223,8 @@ var App = function(){
 
 			socket.on("ev-restartgame", function(payload){
 				console.log("Restarting game " + currentGame.name + "...");
+				currentGame.endGame();
+				startGame(currentGame.name);
 				mainIO.emit("ev-restartgame", true);
 				playersIO.emit("ev-restartgame", true);
 			});

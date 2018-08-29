@@ -39,7 +39,7 @@ var Game = function(){
 	this.onPlayerConnect = function(playerID){}
 	this.onPlayerDisconnect = function(playerID){}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
-
+		
 	}
 	this.onReceiveEventFromMain = function(event, payload){
 
