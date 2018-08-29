@@ -4,26 +4,28 @@ var game;
 
 var test = true;
 $(document).ready(function(){
-	socket = new MTSocket();
+	socket = new MTSocket("main");
 	game = new Game();
 	game.initialize();
 	game.startGame();
 
-
+	socket.onReceiveEvent("PLAYER_ACTION", function(data){
+		game.onReceiveEvent("", data);
+	})
 
 	if(test){
 		$(document).keydown(function(ev){
 			if(ev.keyCode == 38){
 				//up
-				game.onReceiveEvent("adfs", {p2:{y:1}});
+				game.onReceiveEvent("adfs", {p2:{y:1, id:game.p2ID}});
 			}else if(ev.keyCode == 40){
 				//down
-				game.onReceiveEvent("adfs", {p2:{y:-1}});
+				game.onReceiveEvent("adfs", {p2:{y:-1, id:game.p2ID}});
 			}
 		})
 		$(document).keyup(function(ev){
 			if(ev.keyCode == 38 || ev.keyCode == 40){
-				game.onReceiveEvent("adfs", {p2:{y:0}});
+				game.onReceiveEvent("adfs", {p2:{y:0, id:game.p2ID}});
 			}
 		})
 	}
@@ -82,8 +84,8 @@ function Game(){
 		this.walls[3] = {x1: buffer, x2: buffer,
 						y1: 0, y2: this.window.height}; //left
 
-		this.p1ID = parseInt("{{P1ID}}");
-		this.p2ID = parseInt("{{P2ID}}");
+		this.p1ID = p1ID;
+		this.p2ID = p2ID;
 	}
 
 	this.getRect = function(o, w, h){
@@ -254,11 +256,11 @@ function Game(){
 	}
 
 	this.onReceiveEvent = function(ev, data){
-		if (data.p1){
+		if (data.p1 && data.p1.id == this.p1ID){
 			this.p1.dy = data.p1.y * this.playerSpeed;
 		}
-		if (data.p2){
-			this.p2.dy = data.p2.y * this.playerSpeed;
+		if (data.p2 && data.p2.id == this.p2ID){
+			this.p2.dy = -data.p2.y * this.playerSpeed;
 		}
 	}
 

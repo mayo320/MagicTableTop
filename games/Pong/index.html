@@ -6,13 +6,17 @@
 	<link rel="stylesheet" type="text/css" href="/games/Pong/css/index.css">
 </head>
 <body>
-	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 	<script type="text/javascript" src="/js/jquery.js"></script>
 	<script type="text/javascript" src="/js/bootstrap.js"></script>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 	<script type="text/javascript" src="/js/clientsocket.js"></script>
 	<script type="text/javascript" src="/games/Pong/js/index.js"></script>
 	<div id="game-frame">
 		<canvas></canvas>
 	</div>
+	<script type="text/javascript">
+		p1ID = parseInt("{{P1ID}}");
+		p2ID = parseInt("{{P2ID}}");
+	</script>
 </body>
 </html>

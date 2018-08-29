@@ -13,14 +13,27 @@ var Game = function(){
 
 	// optional	fields
 	this.cover_img = "https://pong-2.com/icon-256.png"
-	
+	this.players = [];
 
 	// required functions
-	this.initPlayers = function(players){}
+	this.initPlayers = function(players){
+		// only connected players will be passed in
+		for(var i in players){
+			var p = players[i];
+			this.players.push({
+				id: p.id,
+				name: p.name,
+				ishost: p.host
+			});
+		}
+	}
 	this.initMainHTML = function(html){
+		html = html.replace("{{P1ID}}", this.players[0].id);
+		html = html.replace("{{P2ID}}", this.players[1].id);
 		return html;
 	}
 	this.initPlayerHTML = function(playerID, html){
+		html = html.replace("{{PLAYERID}}", playerID);
 		return html;
 	}
 
@@ -39,7 +52,15 @@ var Game = function(){
 	this.onPlayerConnect = function(playerID){}
 	this.onPlayerDisconnect = function(playerID){}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
-		
+		if(event == "PLAYER_ACTION"){
+			var json = {}
+			if (this.players[0].id == playerID){
+				json.p1 = payload;
+			}else if (this.players[1].id == playerID){
+				json.p2 = payload;
+			}
+			this.sendEventToMain("PLAYER_ACTION", json);
+		}
 	}
 	this.onReceiveEventFromMain = function(event, payload){
 
