@@ -40,13 +40,15 @@ var App = function(){
 	 var setupGames = function(config){
 	 	for(var i in config.games){
 	 		var gameConfig = config.games[i];
-		 	var gameObjectPath = path.resolve(global.root_path + "/games/" + gameConfig.name + "/game.js");
-	 		var game = new Game(require(gameObjectPath), session);
+	 		if (!gameConfig.disabled){
+			 	var gameObjectPath = path.resolve(global.root_path + "/games/" + gameConfig.name + "/game.js");
+		 		var game = new Game(require(gameObjectPath), session);
 
-	 		if (typeof game != "undefined"){
-	 			games.push(game);
-	 		}else{
-	 			console.error("Game is undefined");
+		 		if (typeof game != "undefined"){
+		 			games.push(game);
+		 		}else{
+		 			console.error("Game is undefined");
+		 		}
 	 		}
 	 	}
 	 }
@@ -213,7 +215,7 @@ var App = function(){
 						var playerUrl = `http://${global.addresses[0]}:${config.port}/${gameName}`;
 						playersIO.emit("ev-playgame", playerUrl);
 
-						var url = `http://${config.address}:${config.port}/main/${gameName}`;
+						var url = `http://${global.addresses[0]}:${config.port}/main/${gameName}`;
 						mainIO.emit("ev-playgame", url);
 					}else{
 						mainIO.emit("ev-error", "Game \"" + gameName + "\" does not exist.");

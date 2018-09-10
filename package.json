@@ -1,5 +1,5 @@
 {
-  "name": "mmgame",
+  "name": "MagicTableTop",
   "version": "1.0.0",
   "description": "Magic Mirror Tabletop Games framework",
   "main": "js/main.js",
@@ -13,7 +13,9 @@
     "helmet": "^3.13.0"
   },
   "dependencies": {
-    "electron": "^2.0.8",
+    "electron": "^2.0.9",
+    "express": "^4.16.3",
+    "helmet": "^3.13.0",
     "socket.io": "^2.1.1"
   }
 }

@@ -30,7 +30,9 @@ function createWindow () {
 
 	// and load the index.html of the app.
 	config.address = (config.address === void 0) | (config.address === "") ? (config.address = "localhost") : config.address;
-	mainWindow.loadURL(`http://${config.address}:${config.port}/main`);
+	console.log(`main URL: http://${global.addresses[0]}:${config.port}/main`);
+	// mainWindow.loadURL(`http://${config.address}:${config.port}/main`);
+	mainWindow.loadURL(`http://${global.addresses[0]}:${config.port}/main`);
 	// mainWindow.loadFile('index.html');
 
 	// Open the DevTools.
@@ -49,7 +51,7 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", function() {
-    console.log("Launching application.");
+    console.log("Launching application...");
     createWindow();
 });
 

@@ -13,13 +13,20 @@ var config = {
 		},
 		{
 			name: "Catan", // required - must match folder name inside "games" folder
-			disabled: false, // optional
+			disabled: true, // optional
 			
 			config: [ // optional
 			]
 		},
 		{
 			name: "Pong", // required - must match folder name inside "games" folder
+			disabled: false, // optional
+			
+			config: [ // optional
+			]
+		},
+		{
+			name: "Avalon", // required - must match folder name inside "games" folder
 			disabled: false, // optional
 			
 			config: [ // optional

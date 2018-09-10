@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Splendor</title>
+	<meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86, user-scalable=no">
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="/games/Avalon/css/player.css">
+</head>
+<body>
+	<script src="/js/jquery.js"></script>
+	<script src="/js/bootstrap.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/clientsocket.js"></script>
+	<script type="text/javascript">
+		var myID = {{PLAYERID}};
+		var isHost = {{ISHOST}};
+		var playerName = "{{PLAYERNAME}}";
+	</script>
+	<script src="/games/Avalon/js/player.js"></script>
+
+	<div class="game-frame">
+		<div class="card" id="game-state">
+			<div class="card-header">
+				<h3>Game Status</h3>
+			</div>
+			<div class="card-body">
+				<div id="king" class="hidden">
+					<h3>You are KING!</h3>
+					<h4>Choose X players to go on the quest.</h4>
+					<hr>
+					<div class="container">
+						<div class="row">
+							<div class="player col-6 template" onclick="selectPlayer(this)">
+								<h3>Jack</h3>
+							</div>
+						</div>
+					</div>
+					<hr>
+					<button class="btn btn-default" disabled><h4>SELECT</h4></button>
+				</div>
+				<div id="vote" class="hidden">
+					<h4>These players will go on the quest</h4>
+					<ul>
+						<li> <h5>> <span class="name">Name</span></h5></li>
+					</ul>
+					<hr>
+					<button class="btn btn-danger" style="min-width:20%; float: left;"><h4>Reject</h4></button>
+					<button class="btn btn-success" style="min-width:20%; float: right;"><h4>Accept</h4></button>
+					<br>
+				</div>
+				<div id="onquest">
+					<h3>You are on the QUEST!</h3>
+					<h4>Will you pass or fail the quest?</h4>
+					<hr>
+					<button class="btn btn-danger" style="min-width:30%; float: left;"><h4>FAIL</h4></button>
+					<button class="btn btn-success" style="min-width:30%; float: right;"><h4>PASS</h4></button>
+					<br>
+				</div>
+			</div>
+		</div>
+
+		<div class="card">
+		  	<div class="card-header">
+			  	<h3 class="title">Last Voting Result</h3>
+			  	<h3 class="toggle" onclick="hideID('voting_result')">Toggle<span class="caret"></span></h3>
+		  	</div>
+			<ul class="list-group hidden" id='voting_result'>
+				<li class="list-group-item">
+					<h4 class="name">Jack</h4>
+					<h4 class="role accept"></h4>
+				</li>
+			</ul>
+			
+		</div>
+
+		<div class="card" id="player-card">
+		  	<div class="card-header">
+			  	<h3 class="title">Your Role</h3>
+			  	<h3 class="toggle" onclick="hideID('pcard')">Toggle<span class="caret"></span></h3>
+			</div>
+		 	<img class="card-img-bottom hidden" id="pcard" src="http://i.imgur.com/nCNxgKJ.png">
+		</div>
+
+		<div class="card" id="other-players">
+			<div class="card-header">
+				<h3 class="title">Other Roles</h3>
+			  	<h3 class="toggle" onclick="hideID('pallies')">Toggle<span class="caret"></span></h3>
+			</div>
+			<ul class="list-group hidden" id='pallies'>
+				<li class="list-group-item">
+					<h4 class="name">Jack</h4>
+					<h4 class="role">Morgana</h4>
+				</li>
+				<li class="list-group-item">
+					<h4 class="name">Sal</h4>
+					<h4 class="role">Merlin</h4>
+				</li>
+			</ul>
+		</div>
+
+	</div>
+
+</body>
+</html>
