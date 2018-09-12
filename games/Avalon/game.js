@@ -3,7 +3,7 @@
 var Game = function(){
 	// required fields
 	this.name = "Avalon";
-	this.player_count = [4,10]; // min and max player inclusive
+	this.player_count = [5,10]; // min and max player inclusive
 	this.playtime = "20+ min"; // string indicating playtime
 
 	this.mainHTML = "index.html";
@@ -16,7 +16,6 @@ var Game = function(){
 	this.cover_img = "https://cf.geekdo-images.com/itemrep/img/yottt6aVvGBSOp3D0k4dno5_n3Y=/fit-in/246x300/pic1398895.jpg",
 	
 	this.players = {};
-	this.IDLUT = []; // index: playerID in front end; value at index: playerID in backend
 
 	// required functions
 	this.initPlayers = function(players){
@@ -27,7 +26,6 @@ var Game = function(){
 				name: p.name,
 				ishost: p.host
 			};
-			this.IDLUT.push(p.id);
 		}
 	}
 	// initPlayers would already be called
@@ -37,10 +35,9 @@ var Game = function(){
 		return html;
 	}
 	this.initPlayerHTML = function(playerID, html){
-		var myID = this.IDLUT.indexOf(playerID);
 		html = html.replace("{{PLAYERNAME}}", this.players[playerID].name);
 		html = html.replace("{{ISHOST}}", this.players[playerID].ishost);
-		html = html.replace("{{PLAYERID}}", myID);
+		html = html.replace("{{PLAYERID}}", playerID);
 		return html;
 	}
 
@@ -57,10 +54,10 @@ var Game = function(){
 
 	// Fill these out
 	this.onPlayerConnect = function(playerID){
-		this.sendEventToMain("PLAYER_CONNECT", this.IDLUT.indexOf(playerID));
+		this.sendEventToMain("PLAYER_CONNECT", playerID);
 	}
 	this.onPlayerDisconnect = function(playerID){
-		this.sendEventToMain("PLAYER_DISCONNECT", this.IDLUT.indexOf(playerID));
+		this.sendEventToMain("PLAYER_DISCONNECT", playerID);
 	}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
 		this.sendEventToMain(event, payload);
@@ -69,7 +66,7 @@ var Game = function(){
 		switch(event){
 			case "PLAYER_ACTION":
 				// Send to specific player
-				this.sendEventToPlayers([this.IDLUT[payload]], "PLAYER_TURN", true);
+				this.sendEventToPlayers([payload], "PLAYER_TURN", true);
 				break;
 			case "BROADCAST":
 				// Send to all

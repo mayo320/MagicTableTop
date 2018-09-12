@@ -1,31 +1,90 @@
 
 var players = [
 	{
-		name: "Jack", id:0
+		name: "Jack", id:0, role: "Mordred"
 	},
 	{
-		name: "Salman", id:4
+		name: "Salman", id:4, role: ""
 	},
 	{
-		name: "Jim", id:2
+		name: "Jim", id:2, role: "Merlin"
 	},
 	{
-		name: "Bran", id:3
+		name: "Bran", id:3, role: "Merlin"
 	},
 	{
-		name: "Farhat", id:1
+		name: "Farhat", id:1, role: ""
 	},
 ];
+var player = {};
+
+var voting_results = { // indexing is player id
+	0: false, 1: true, 2: true, 3: true, 4: false 
+};
 
 var kingSelectedPlayers = [];
+var kingSelectableNum = 0;
 var king_players_template = "";
+var other_players_template = "";
+var voting_result_template = "";
+var socket;
 $(document).ready(function(){
+	socket = new MTSocket("player");
+	socket.onReceiveEvent("VOTING_RESULT", function(payload){
+		voting_results = payload;
+		UIUpdateVotingResult();
+	});
+	socket.onReceiveEvent("GAME_STATE", function(payload){
+		UIUpdateGameStatus(payload.ev, payload.load);
+	});
+
+
+
+	$.each(players, function(i, p){
+		if (p.id == myID){
+			player = p;
+		}
+	});
 
 	king_players_template = $("#king .player.template").parent().html();
 	$("#king .player.template").parent().html("");
 	UIUpdateKingPlayers();
 
+	other_players_template = $("#other-players #pallies").html();
+	$("#other-players #pallies").html("");
+	UIUpdateOtherPlayers();
+
+	UIUpdatePlayerRole();
+
+	voting_result_template = $("#voting_result").html();
+	$("#voting_result").html("");
+	UIUpdateVotingResult();
 });
+function UIUpdateGameStatus(ev, payload){
+	$("#game-state .item").addClass("hidden");
+	$("#game-state .card-body").removeClass("hidden");
+	switch(ev){
+		case "KING":
+			$("#game-state #king").removeClass("hidden");
+			kingSelectableNum = parseInt(payload);
+			$("#game-state #king .num").html(payload);
+			break;
+		case "VOTE":
+			$("#game-state #vote").removeClass("hidden");
+			var string = ""
+			$.each(payload, function(i, p){
+				string += "<li><h5>>"+p+"</h5></li>";
+			});
+			$("#game-state #vote ul").html(string);
+			break;
+		case "QUEST":
+			$("#game-state #onquest").removeClass("hidden");
+			break;
+		default:
+			$("#game-state .card-body").addClass("hidden");
+			break;
+	}
+}
 
 function UIUpdateKingPlayers(){
 	var $list = $("#king .row");
@@ -37,6 +96,39 @@ function UIUpdateKingPlayers(){
 		$player.find("h3").html(player.name);
 	});
 }
+
+function UIUpdateOtherPlayers(){
+	var $list = $("#pallies");
+	$.each(players, function(i, player){
+		if (myID != player.id && player.role){
+			$list.append(other_players_template);
+			var $player = $list.find("li:last");
+			$player.find(".name").html(player.name);
+			$player.find(".role").html(player.role);
+		}
+	});	
+}
+
+function UIUpdatePlayerRole(){
+	$("#player-card #pcard img").attr("src", roles[player.role].img);
+	$("#player-card #pcard .role").html(player.role);
+	$("#player-card #pcard .description").html(roles[player.role].description);
+}
+
+function UIUpdateVotingResult(){
+	$list = $("#voting_result");
+	$.each(players, function(i, p){
+		$list.append(voting_result_template);
+		$li = $list.find("li:last");
+		$li.find(".name").html(p.name);
+		if (voting_results[p.id]){
+			$li.find(".role").removeClass("reject").addClass("accept");
+		}else{
+			$li.find(".role").removeClass("accept").addClass("reject");
+		}
+	});
+}
+
 
 function hideID(id){
 	var $obj = $("#" + id);
@@ -58,10 +150,16 @@ function selectPlayer(obj){
 		if (kingSelectedPlayers.indexOf(name) < 0) kingSelectedPlayers.push(name);
 	}
 
-	if (kingSelectedPlayers.length == 3){
+	if (kingSelectedPlayers.length == kingSelectableNum && kingSelectableNum != 0){
 		$("#king .btn").attr("disabled", false);
 	}else{
 		$("#king .btn").attr("disabled", true);
 	}
 
+}
+
+function sendSelectedPlayers(){
+	// king selected players.
+	kingSelectedPlayers;
+	socket.sendEvent("", {});
 }
