@@ -16,6 +16,7 @@ The following APIs are used
 
 ### Installation
 Install [nodejs](https://nodejs.org/en/download/)
+
 Clone this git repo
 ```
 git clone https://github.com/imjackyan/MagicTableTop
