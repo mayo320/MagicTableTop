@@ -28,7 +28,6 @@ var roles = {
 		img: [
 			"http://i.imgur.com/rYzEqqC.png",
 			"http://i.imgur.com/1Cc1liX.png",
-			"http://i.imgur.com/LdMBUV9.png",
 		]
 	},
 	Minion: {

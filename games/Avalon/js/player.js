@@ -1,7 +1,7 @@
 
 var players = [
 	{
-		name: "Jack", id:0, role: "Mordred"
+		name: "Jack", id:0, role: "Servant"
 	},
 	{
 		name: "Salman", id:4, role: ""
@@ -36,6 +36,9 @@ $(document).ready(function(){
 	});
 	socket.onReceiveEvent("GAME_STATE", function(payload){
 		UIUpdateGameStatus(payload.ev, payload.load);
+	});
+	socket.onReceiveEvent("PLAYERS_INFO", function(payload){
+		players = payload.players;
 	});
 
 
@@ -110,7 +113,11 @@ function UIUpdateOtherPlayers(){
 }
 
 function UIUpdatePlayerRole(){
-	$("#player-card #pcard img").attr("src", roles[player.role].img);
+	if (typeof roles[player.role].img != "string"){
+		$("#player-card #pcard img").attr("src", roles[player.role].img[randInt(0,roles[player.role].img.length)]);
+	}else{
+		$("#player-card #pcard img").attr("src", roles[player.role].img);
+	}
 	$("#player-card #pcard .role").html(player.role);
 	$("#player-card #pcard .description").html(roles[player.role].description);
 }
@@ -129,6 +136,10 @@ function UIUpdateVotingResult(){
 	});
 }
 
+function randInt(l, h){
+		// inclusive, exclusive
+		return Math.floor(Math.random() * (h - l));	
+}
 
 function hideID(id){
 	var $obj = $("#" + id);
@@ -160,6 +171,15 @@ function selectPlayer(obj){
 
 function sendSelectedPlayers(){
 	// king selected players.
-	kingSelectedPlayers;
-	socket.sendEvent("", {});
+	socket.sendEvent("PLAYER_KING_SELECT", kingSelectedPlayers);
+}
+function sendVote(vote){
+	socket.sendEvent("PLAYER_VOTE", vote);
+}
+function sendQuestResult(res){
+	socket.sendEvent("PLAYER_QUEST", res);
+}
+function sendAssasinate(playerID){
+	// used by Assassin only.
+	socket.sendEvent("PLAYER_ASSASSINATE", playerID);
 }
