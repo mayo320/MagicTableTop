@@ -30,6 +30,10 @@ var Game = function(){
 	var questNumber = [2,3,2,3,3] // how many players required for each quest
 	var currQuest = 0;
 
+	var lastVotingResult = {};
+
+	var initialized = false;
+
 	// required functions
 	this.initPlayers = function(players){
 		for (var i in players){
@@ -74,6 +78,17 @@ var Game = function(){
 	// Fill these out
 	this.onPlayerConnect = function(playerID){
 		// broadcast data to this player
+		if(initialized){
+			this.emitData();
+			this.emitPlayerData(playerID);
+
+			if(playerID == currentKing){
+				this.sendEventToPlayers([currentKing], "GAME_STATE", {
+					ev: "KING",
+					load: questNumber[currQuest]
+				});
+			}
+		}
 	}
 	this.onPlayerDisconnect = function(playerID){
 		this.sendEventToMain("PLAYER_DISCONNECT", playerID);
@@ -85,7 +100,7 @@ var Game = function(){
 				// king selected a list of players
 				currentQuesting = payload;
 				gameState = GameState.vote;
-				loopPlayers((id, p) => {p.vote = undefined;});		
+				this.loopPlayers((id, p) => {p.vote = undefined;});		
 				this.sendEventToAll("GAME_STATE", {
 					ev: "VOTE",
 					load: currentQuesting.map((id) => this.players[id].name)
@@ -96,11 +111,12 @@ var Game = function(){
 				this.players[playerID].vote = payload;
 				var allvote = true;
 				var voteresult = 0;
-				loopPlayers((id, p) => {
+				this.loopPlayers((id, p) => {
 					if (typeof p.vote == "undefined"){
 						allvote = false;
 					}else{
 						voteresult += p.vote ? 1 : -1;
+						lastVotingResult[p.id] = p.vote;
 					}
 				});
 				if (allvote){
@@ -115,14 +131,14 @@ var Game = function(){
 					}else{
 						// voting passed
 						gameState = GameState.quest;
-						loopPlayers((id, p) => {p.quest = undefined;});
+						this.loopPlayers((id, p) => {p.quest = undefined;});
 						this.sendEventToPlayers(currentQuesting, "GAME_STATE", {
 							ev: "QUEST",
 							load: 0
 						})
 					}
 					var load = {};
-					loopPlayers((id, p) => {load[id] = p.vote});
+					this.loopPlayers((id, p) => {load[id] = p.vote});
 					this.sendEventToAll("VOTING_RESULT", load);
 				}
 				break;
@@ -131,7 +147,7 @@ var Game = function(){
 				this.players[playerID].quest = payload;
 				var allvote = true;
 				var questres = 0;
-				loopPlayers((id, p) => {
+				this.loopPlayers((id, p) => {
 					if (currentQuesting.indexOf(id) >= 0){
 						if (typeof p.quest == "undefined"){
 							allvote = false;
@@ -151,6 +167,9 @@ var Game = function(){
 					})
 				}
 				break;
+			case "EMIT":
+				this.emitData();
+				this.emitPlayerData(playerID);
 		}
 	}
 	this.onReceiveEventFromMain = function(event, payload){}
@@ -164,12 +183,21 @@ var Game = function(){
 			game_state: gameState,
 			current_king: currentKing,
 			players_onquest: currentQuesting,
-			players: this.players.map((p) => {
-				var temp = copy(p);
+			last_voting_result: lastVotingResult,
+			players: Object.keys(this.players).map((k) => {
+				var temp = copy(this.players[k]);
 				temp.role = undefined;
 				return temp;
 			})
 		}
+		this.sendEventToPlayers(Object.keys(this.players), "EMIT", data);
+		this.sendEventToMain("EMIT", data);
+	}
+	this.emitPlayerData = function(playerID){
+		var data = {
+			players: this.getPlayersData(playerID)
+		}
+		this.sendEventToPlayers([playerID], "PLAYERS_INFO", data);
 	}
 	this.loopPlayers = function(callback){
 		if (typeof callback != "function") return;
@@ -177,6 +205,59 @@ var Game = function(){
 			var id = this.playerIDs[i]
 			callback(id, this.players[id]);
 		}
+	}
+	this.getPlayersData = function(playerID){
+		var p = this.players[playerID];
+		var knows = {}
+		switch (p.role){
+			case "Merlin":
+				knows["Assassin"] = "Evil";
+				knows["Morgana"] = "Evil";
+				knows["Oberon"] = "Evil";
+				knows["Minion"] = "Evil";
+				break;
+			case "Percival":
+				knows["Merlin"] = "Merlin";
+				knows["Morgana"] = "Merlin";
+				break;
+			case "Assassin":
+				knows["Morgana"] = "Evil";
+				knows["Mordred"] = "Evil";
+				knows["Minion"] = "Evil";
+				break;
+			case "Morgana":
+				knows["Assassin"] = "Evil";
+				knows["Mordred"] = "Evil";
+				knows["Minion"] = "Evil";
+				break;
+			case "Oberon":
+				break;
+			case "Mordred":
+				knows["Assassin"] = "Evil";
+				knows["Morgana"] = "Evil";
+				knows["Minion"] = "Evil";
+				break;
+			case "Servant":
+				break;
+			case "Minion":
+				knows["Assassin"] = "Evil";
+				knows["Morgana"] = "Evil";
+				knows["Mordred"] = "Evil";
+				break;
+		}
+
+		var players = Object.keys(this.players).map((k) => {
+			var temp = copy(this.players[k]);
+			if (k != playerID){
+				if (temp.role in knows){
+					temp.role = knows[temp.role];
+				}else{
+					temp.role = "";
+				}
+			}
+			return temp;
+		})
+		return players;
 	}
 	var copy = function(c){
 		return JSON.parse(JSON.stringify(c));
@@ -188,6 +269,7 @@ var Game = function(){
 	// In Avalon, game logic will be handled in the back end (here) instead of main
 	this.initializeGame = function(){
 		// get players to choose available roles
+		initialized = true;
 		questNumber = [2,3,2,3,3];
 		this.initializeRoles();
 		this.initializeKing();
@@ -205,13 +287,12 @@ var Game = function(){
 	var availableRoles = ["Merlin", "Assassin", "Servant", "Minion", "Servant"];
 
 	this.initializeRoles = function(){
-		var players = this.players;
-		if (this.playerIDs.length in roleDistribution){
-			var distribution = copy(roleDistribution[this.playerIDs.length]);
+		if (this.playerIDs.length in roleDistribution || true){
+			// var distribution = copy(roleDistribution[this.playerIDs.length]);
 
 			for (var i = 0; i < this.playerIDs.length; i++){
-				var p = playesr[this.playerIDs[i]];
-				p.role = availableRoles.splice(randInt(0, availableRoles.length), 1);
+				var p = this.players[this.playerIDs[i]];
+				p.role = availableRoles.splice(randInt(0, availableRoles.length), 1)[0];
 			}
 		}
 	}

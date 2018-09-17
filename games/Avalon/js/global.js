@@ -1,3 +1,8 @@
+var GameState = {
+	king: 0,
+	vote: 1,
+	quest: 2
+}
 var roles = {
 	Percival: {
 		description: "You know the Merlins (one of them is Morgana)",

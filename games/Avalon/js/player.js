@@ -35,34 +35,48 @@ $(document).ready(function(){
 		UIUpdateVotingResult();
 	});
 	socket.onReceiveEvent("GAME_STATE", function(payload){
+		console.log(payload);
+		UIUpdateKingPlayers();
 		UIUpdateGameStatus(payload.ev, payload.load);
 	});
 	socket.onReceiveEvent("PLAYERS_INFO", function(payload){
 		players = payload.players;
+		updatePlayerVar();
+		UIUpdateOtherPlayers();
+		UIUpdatePlayerRole();
+	});
+	socket.onReceiveEvent("EMIT", function(payload){
+		console.log(payload);
+		voting_results = payload.last_voting_result;
+		UIUpdateVotingResult();
 	});
 
+	UIUpdateGameStatus();
 
+	updatePlayerVar();
+	
+	king_players_template = $("#king .player.template").parent().html();
+	$("#king .player.template").parent().html("");
+	// UIUpdateKingPlayers();
 
+	other_players_template = $("#other-players #pallies").html();
+	$("#other-players #pallies").html("");
+	// UIUpdateOtherPlayers();
+
+	// UIUpdatePlayerRole();
+
+	voting_result_template = $("#voting_result").html();
+	$("#voting_result").html("");
+	// UIUpdateVotingResult();
+
+});
+function updatePlayerVar(){
 	$.each(players, function(i, p){
 		if (p.id == myID){
 			player = p;
 		}
 	});
-
-	king_players_template = $("#king .player.template").parent().html();
-	$("#king .player.template").parent().html("");
-	UIUpdateKingPlayers();
-
-	other_players_template = $("#other-players #pallies").html();
-	$("#other-players #pallies").html("");
-	UIUpdateOtherPlayers();
-
-	UIUpdatePlayerRole();
-
-	voting_result_template = $("#voting_result").html();
-	$("#voting_result").html("");
-	UIUpdateVotingResult();
-});
+}
 function UIUpdateGameStatus(ev, payload){
 	$("#game-state .item").addClass("hidden");
 	$("#game-state .card-body").removeClass("hidden");
@@ -91,6 +105,7 @@ function UIUpdateGameStatus(ev, payload){
 
 function UIUpdateKingPlayers(){
 	var $list = $("#king .row");
+	$list.html("");
 	$.each(players, function(i, player){
 		$list.append(king_players_template);
 		var $player = $list.find(".player:last");
@@ -102,6 +117,7 @@ function UIUpdateKingPlayers(){
 
 function UIUpdateOtherPlayers(){
 	var $list = $("#pallies");
+	$list.html("");
 	$.each(players, function(i, player){
 		if (myID != player.id && player.role){
 			$list.append(other_players_template);
@@ -124,14 +140,20 @@ function UIUpdatePlayerRole(){
 
 function UIUpdateVotingResult(){
 	$list = $("#voting_result");
+	$list.html("");
 	$.each(players, function(i, p){
 		$list.append(voting_result_template);
 		$li = $list.find("li:last");
 		$li.find(".name").html(p.name);
-		if (voting_results[p.id]){
-			$li.find(".role").removeClass("reject").addClass("accept");
+		$li.removeClass("hidden");
+		if (p.id in voting_results){
+			if (voting_results[p.id]){
+				$li.find(".role").removeClass("reject").addClass("accept");
+			}else{
+				$li.find(".role").removeClass("accept").addClass("reject");
+			}
 		}else{
-			$li.find(".role").removeClass("accept").addClass("reject");
+			$li.addClass("hidden");
 		}
 	});
 }
@@ -182,4 +204,7 @@ function sendQuestResult(res){
 function sendAssasinate(playerID){
 	// used by Assassin only.
 	socket.sendEvent("PLAYER_ASSASSINATE", playerID);
+}
+function sendRequestEmit(){
+	socket.sendEvent("EMIT", 1);
 }
