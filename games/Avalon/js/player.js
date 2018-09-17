@@ -17,11 +17,11 @@ var players = [
 	},
 ];
 var player = {};
+var cur_role_count = 0;
 
 var voting_results = { // indexing is player id
 	0: false, 1: true, 2: true, 3: true, 4: false 
 };
-
 var kingSelectedPlayers = [];
 var kingSelectableNum = 0;
 var king_players_template = "";
@@ -50,6 +50,13 @@ $(document).ready(function(){
 		voting_results = payload.last_voting_result;
 		UIUpdateVotingResult();
 	});
+	socket.onReceiveEvent("START_GAME", function(payload){
+		$(".game-frame").removeClass("hidden");
+	});
+
+	if (typeof backendPlayers != "undefined"){
+		players = backendPlayers;
+	}
 
 	UIUpdateGameStatus();
 
@@ -68,6 +75,29 @@ $(document).ready(function(){
 	voting_result_template = $("#voting_result").html();
 	$("#voting_result").html("");
 	// UIUpdateVotingResult();
+
+	if (isHost){
+		var $role = $("#role_selection");
+		$role.removeClass("hidden");
+		$role.find(".num_players").html(players.length);
+		var $ul = $role.find("ul");
+		var html = ""
+		$.each(Object.keys(roles), function(i, r){
+			var role = roles[r];
+			html += "<li class='list-group-item'>";
+			html += "<h4 class='name'><span class='num'>"+role.count+"</span> | "+r+"</h4>";
+			html += "<div class='role'><div onclick='removeRole(this,\""+r+"\")'><h4>-</h4></div>";
+			html += "<div onclick='addRole(this,\""+r+"\")'><h4>+</h4></div></div>";
+			html += "</li>"
+			cur_role_count += role.count;
+		})
+		$ul.html(html);
+		if (cur_role_count == players.length){
+			$("#role_selection .btn").attr("disabled", false);
+		}else{
+			$("#role_selection .btn").attr("disabled", true);
+		}
+	}
 
 });
 function updatePlayerVar(){
@@ -191,20 +221,95 @@ function selectPlayer(obj){
 
 }
 
+function sendGameStatus(ev, load){
+	$popup = $("#popup");
+	$popup.removeClass("hidden");
+	switch(ev){
+		case "KING":
+			$popup.find(".header").html("King");
+			var body = "You want to send these players on quest?<br>";
+			for (var i = 0; i < players.length; i++){
+				if (kingSelectedPlayers.indexOf(players[i].id.toString()) >= 0) {
+					body += " > " + players[i].name + "<br>";
+				}
+			}
+			$popup.find(".body").html(body);
+			$popup.find(".yes").attr("onclick", "sendSelectedPlayers()");
+			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			break;
+		case "VOTE":
+			$popup.find(".header").html("Voting");
+			$popup.find(".body").html("You are " + (load ? "ACCEPTING" : "REJECTING"));
+			$popup.find(".yes").attr("onclick", "sendVote("+load+")");
+			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			break;
+		case "QUEST":
+			$popup.find(".header").html("Questing");
+			$popup.find(".body").html("You want to " + (load ? "PASS" : "FAIL") + " the quest?");
+			$popup.find(".yes").attr("onclick", "sendQuestResult("+load+")");
+			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			break;
+	}
+}
+
 function sendSelectedPlayers(){
 	// king selected players.
+	$("#popup").addClass("hidden");
 	socket.sendEvent("PLAYER_KING_SELECT", kingSelectedPlayers);
+	UIUpdateGameStatus();
 }
 function sendVote(vote){
+	$("#popup").addClass("hidden");
 	socket.sendEvent("PLAYER_VOTE", vote);
+	UIUpdateGameStatus();
 }
 function sendQuestResult(res){
+	$("#popup").addClass("hidden");
 	socket.sendEvent("PLAYER_QUEST", res);
+	UIUpdateGameStatus();
 }
 function sendAssasinate(playerID){
 	// used by Assassin only.
+	$("#popup").addClass("hidden");
 	socket.sendEvent("PLAYER_ASSASSINATE", playerID);
 }
 function sendRequestEmit(){
 	socket.sendEvent("EMIT", 1);
+}
+
+function addRole(obj, role){
+	if (cur_role_count < players.length){
+		if (role == "Minion" || role == "Servant"){
+			roles[role].count += 1;
+			cur_role_count += 1;
+		}else{
+			if (roles[role].count < 1){
+				roles[role].count += 1;
+				cur_role_count += 1;
+			}
+		}
+
+		$(obj).closest(".list-group-item").find(".num").html(roles[role].count);
+	}
+	if (cur_role_count == players.length){
+		$("#role_selection .btn").attr("disabled", false);
+	}else{
+		$("#role_selection .btn").attr("disabled", true);
+	}
+}
+
+function removeRole(obj, role){
+	if (role != "Merlin" && role != "Assassin" && roles[role].count > 0){
+		roles[role].count -= 1;
+		cur_role_count -= 1;
+		$(obj).closest(".list-group-item").find(".num").html(roles[role].count);
+	}
+
+
+
+	if (cur_role_count == players.length){
+		$("#role_selection .btn").attr("disabled", false);
+	}else{
+		$("#role_selection .btn").attr("disabled", true);
+	}
 }

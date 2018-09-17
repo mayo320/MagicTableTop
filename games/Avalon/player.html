@@ -15,11 +15,12 @@
 		var myID = {{PLAYERID}};
 		var isHost = {{ISHOST}};
 		var playerName = "{{PLAYERNAME}}";
+		var backendPlayers = {{PLAYERS}};
 	</script>
 	<script src="/games/Avalon/js/global.js"></script>
 	<script src="/games/Avalon/js/player.js"></script>
 
-	<div class="game-frame">
+	<div class="game-frame hidden">
 		<div class="card" id="game-state">
 			<div class="card-header">
 				<h3>Game Status</h3>
@@ -37,7 +38,7 @@
 						</div>
 					</div>
 					<hr>
-					<button class="btn btn-default" disabled onclick="sendSelectedPlayers()"><h4>SELECT</h4></button>
+					<button class="btn btn-default" disabled onclick="sendGameStatus('KING')"><h4>SELECT</h4></button>
 				</div>
 				<div id="vote" class="hidden item">
 					<h4>These players will go on the quest</h4>
@@ -45,16 +46,16 @@
 						<li> <h5>> <span class="name">Name</span></h5></li>
 					</ul>
 					<hr>
-					<button onclick="sendVote(false)" class="btn btn-danger" style="min-width:20%; float: left;"><h4>Reject</h4></button>
-					<button onclick="sendVote(true)" class="btn btn-success" style="min-width:20%; float: right;"><h4>Accept</h4></button>
+					<button onclick="sendGameStatus('VOTE', false)" class="btn btn-danger" style="min-width:20%; float: left;"><h4>Reject</h4></button>
+					<button onclick="sendGameStatus('VOTE', true)" class="btn btn-success" style="min-width:20%; float: right;"><h4>Accept</h4></button>
 					<br>
 				</div>
 				<div id="onquest" class="hidden item">
 					<h3>You are on the QUEST!</h3>
 					<h4>Will you pass or fail the quest?</h4>
 					<hr>
-					<button onclick="sendQuestResult(false)" class="btn btn-danger" style="min-width:30%; float: left;"><h4>FAIL</h4></button>
-					<button onclick="sendQuestResult(true)" class="btn btn-success" style="min-width:30%; float: right;"><h4>PASS</h4></button>
+					<button onclick="sendGameStatus('QUEST', false)" class="btn btn-danger" style="min-width:30%; float: left;"><h4>FAIL</h4></button>
+					<button onclick="sendGameStatus('QUEST', true)" class="btn btn-success" style="min-width:30%; float: right;"><h4>PASS</h4></button>
 					<br>
 				</div>
 			</div>
@@ -101,6 +102,41 @@
 			</ul>
 		</div>
 
+		<div id="popup" class="hidden">
+			<div class="card" style="min-width: 65%;">
+				<div class="card-header">
+					<h3 class="header">Header</h3>
+				</div>
+				<div class="card-body">
+					<h5 class="body">Body <br> asdf</h5>
+				</div>
+				<hr>
+				<div style="padding: 0.5rem;">
+					<button class="btn no" style="float:left; min-width:40%"><h4>No</h4></button>
+					<button class="btn yes" style="float:right; min-width:40%"><h4>Yes</h4></button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div id="role_selection" class="hidden">
+		<div class="card">
+			<div class="card-header">
+				<h3>Hi Host. <br>There are <span class="num_players">X</span> players, please select the distribution of roles.</h3>
+			</div>
+			<ul class="list-group" id='available_roles'>
+				<li class="list-group-item">
+					<h4 class="name">Merlin | <span class="num">1</span></h4>
+					<div class="role">
+						<div><h4>-</h4></div>
+						<div><h4>+</h4></div>
+					</div>
+				</li>
+			</ul>
+			<button class="btn btn-success" style="margin:1rem;">
+				<h4>Confirm</h4></button>
+		</div>
 	</div>
 
 </body>

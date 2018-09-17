@@ -18,6 +18,7 @@ var Game = function(){
 	this.players = {};
 	this.playerIDs = [];
 	var GameState = {
+		selecting_roles: -1,
 		king: 0,
 		vote: 1,
 		quest: 2
@@ -61,6 +62,7 @@ var Game = function(){
 		html = html.replace("{{PLAYERNAME}}", this.players[playerID].name);
 		html = html.replace("{{ISHOST}}", this.players[playerID].ishost);
 		html = html.replace("{{PLAYERID}}", playerID);
+		html = html.replace("{{PLAYERS}}", JSON.stringify(this.getPlayersData(playerID)));
 		return html;
 	}
 
@@ -82,10 +84,24 @@ var Game = function(){
 			this.emitData();
 			this.emitPlayerData(playerID);
 
-			if(playerID == currentKing){
+			if (gameState == GameState.king && playerID == currentKing){
 				this.sendEventToPlayers([currentKing], "GAME_STATE", {
 					ev: "KING",
 					load: questNumber[currQuest]
+				});
+			}
+			else if (gameState == GameState.vote && typeof this.players[playerID].vote == "undefined"){
+				this.sendEventToPlayers([playerID], "GAME_STATE", {
+					ev: "VOTE",
+					load: currentQuesting.map((id) => this.players[id].name)
+				});
+			}
+			else if(gameState == GameState.quest && 
+					currentQuesting.indexOf(playerID) >= 0 &&
+					typeof this.players[playerID].quest == "undefined"){
+				this.sendEventToPlayers([playerID], "GAME_STATE", {
+					ev: "QUEST",
+					load: 1
 				});
 			}
 		}
@@ -98,7 +114,7 @@ var Game = function(){
 			case "PLAYER_KING_SELECT":
 				// payload is a list of IDs
 				// king selected a list of players
-				currentQuesting = payload;
+				currentQuesting = payload.map((id) => parseInt(id));
 				gameState = GameState.vote;
 				this.loopPlayers((id, p) => {p.vote = undefined;});		
 				this.sendEventToAll("GAME_STATE", {
@@ -308,9 +324,11 @@ var Game = function(){
 		for (var i = 0; i < this.playerIDs.length; i++){
 			if(players[this.playerIDs[i]].isKing){
 				players[this.playerIDs[i]].isKing = false;
-				var k = i == this.playerIDs.length - 1 ? 0 : i + 1;
+				var k = i + 1;
+				k = k >= this.playerIDs.length ? 0 : k;
 				players[this.playerIDs[k]].isKing = true;
 				currentKing = this.playerIDs[k];
+				break;
 			}
 		}
 	}
