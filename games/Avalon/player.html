@@ -16,6 +16,8 @@
 		var isHost = {{ISHOST}};
 		var playerName = "{{PLAYERNAME}}";
 		var backendPlayers = {{PLAYERS}};
+		var rolesCount = {{ROLESCOUNT}};
+		var initializingState = {{GAMESTATE}};
 	</script>
 	<script src="/games/Avalon/js/global.js"></script>
 	<script src="/games/Avalon/js/player.js"></script>
@@ -134,7 +136,7 @@
 					</div>
 				</li>
 			</ul>
-			<button class="btn btn-success" style="margin:1rem;">
+			<button class="btn btn-success" style="margin:1rem;" onclick="sendRoles()">
 				<h4>Confirm</h4></button>
 		</div>
 	</div>

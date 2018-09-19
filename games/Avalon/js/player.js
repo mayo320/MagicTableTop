@@ -41,6 +41,7 @@ $(document).ready(function(){
 	});
 	socket.onReceiveEvent("PLAYERS_INFO", function(payload){
 		players = payload.players;
+		console.log(players);
 		updatePlayerVar();
 		UIUpdateOtherPlayers();
 		UIUpdatePlayerRole();
@@ -50,8 +51,13 @@ $(document).ready(function(){
 		voting_results = payload.last_voting_result;
 		UIUpdateVotingResult();
 	});
-	socket.onReceiveEvent("START_GAME", function(payload){
+	socket.onReceiveEvent("ROLES_INFO", function(payload){
+		rolesCount = payload;
+	});
+	socket.onReceiveEvent("GAME_START", function(payload){
+		console.log("Game starting..")
 		$(".game-frame").removeClass("hidden");
+		$("#role_selection").addClass("hidden");
 	});
 
 	if (typeof backendPlayers != "undefined"){
@@ -76,7 +82,7 @@ $(document).ready(function(){
 	$("#voting_result").html("");
 	// UIUpdateVotingResult();
 
-	if (isHost){
+	if (isHost && initializingState == GameState.selecting_roles){
 		var $role = $("#role_selection");
 		$role.removeClass("hidden");
 		$role.find(".num_players").html(players.length);
@@ -85,18 +91,20 @@ $(document).ready(function(){
 		$.each(Object.keys(roles), function(i, r){
 			var role = roles[r];
 			html += "<li class='list-group-item'>";
-			html += "<h4 class='name'><span class='num'>"+role.count+"</span> | "+r+"</h4>";
+			html += "<h4 class='name'><span class='num'>"+rolesCount[r].count+"</span> | "+r+"</h4>";
 			html += "<div class='role'><div onclick='removeRole(this,\""+r+"\")'><h4>-</h4></div>";
 			html += "<div onclick='addRole(this,\""+r+"\")'><h4>+</h4></div></div>";
 			html += "</li>"
-			cur_role_count += role.count;
 		})
 		$ul.html(html);
-		if (cur_role_count == players.length){
+		if (rolesCount.count == players.length){
 			$("#role_selection .btn").attr("disabled", false);
 		}else{
 			$("#role_selection .btn").attr("disabled", true);
 		}
+	}else if(initializingState != GameState.selecting_roles){
+		$(".game-frame").removeClass("hidden");
+		$("#role_selection").addClass("hidden");
 	}
 
 });
@@ -159,13 +167,15 @@ function UIUpdateOtherPlayers(){
 }
 
 function UIUpdatePlayerRole(){
-	if (typeof roles[player.role].img != "string"){
-		$("#player-card #pcard img").attr("src", roles[player.role].img[randInt(0,roles[player.role].img.length)]);
-	}else{
-		$("#player-card #pcard img").attr("src", roles[player.role].img);
+	if (player.role){
+		if (typeof roles[player.role].img != "string"){
+			$("#player-card #pcard img").attr("src", roles[player.role].img[randInt(0,roles[player.role].img.length)]);
+		}else{
+			$("#player-card #pcard img").attr("src", roles[player.role].img);
+		}
+		$("#player-card #pcard .role").html(player.role);
+		$("#player-card #pcard .description").html(roles[player.role].description);
 	}
-	$("#player-card #pcard .role").html(player.role);
-	$("#player-card #pcard .description").html(roles[player.role].description);
 }
 
 function UIUpdateVotingResult(){
@@ -277,21 +287,31 @@ function sendRequestEmit(){
 	socket.sendEvent("EMIT", 1);
 }
 
+function numOfAlignment(a){
+	// a: 0=good, 1=evil
+	return rolesCount.alignment[a];
+}
+function sendRoles(){
+	socket.sendEvent("PLAYER_ROLES", {
+		ev: "CONFIRM"
+	});
+}
 function addRole(obj, role){
-	if (cur_role_count < players.length){
-		if (role == "Minion" || role == "Servant"){
-			roles[role].count += 1;
-			cur_role_count += 1;
-		}else{
-			if (roles[role].count < 1){
-				roles[role].count += 1;
-				cur_role_count += 1;
-			}
-		}
-
+	var pcount = players.length;
+	if (rolesCount.count < players.length){
+		if (rolesCount[role].count < rolesCount[role].max &&
+			numOfAlignment(roles[role].alignment) < rolesCount.distribution[pcount][roles[role].alignment]){
+			rolesCount[role].count += 1;
+			rolesCount.count += 1;
+			rolesCount.alignment[roles[role].alignment] += 1;
+			socket.sendEvent("PLAYER_ROLES", {
+				ev: "ADD",
+				role: role
+			});
+		}		
 		$(obj).closest(".list-group-item").find(".num").html(roles[role].count);
 	}
-	if (cur_role_count == players.length){
+	if (rolesCount.count == players.length){
 		$("#role_selection .btn").attr("disabled", false);
 	}else{
 		$("#role_selection .btn").attr("disabled", true);
@@ -299,15 +319,21 @@ function addRole(obj, role){
 }
 
 function removeRole(obj, role){
-	if (role != "Merlin" && role != "Assassin" && roles[role].count > 0){
-		roles[role].count -= 1;
-		cur_role_count -= 1;
+	if (rolesCount[role].count > rolesCount[role].min &&
+		numOfAlignment(roles[role].alignment) > 0){
+		rolesCount[role].count -= 1;
+		rolesCount.count -= 1;
+		rolesCount.alignment[roles[role].alignment] -= 1;
 		$(obj).closest(".list-group-item").find(".num").html(roles[role].count);
+		socket.sendEvent("PLAYER_ROLES", {
+			ev: "REMOVE",
+			role: role
+		});
 	}
 
 
 
-	if (cur_role_count == players.length){
+	if (rolesCount.count == players.length){
 		$("#role_selection .btn").attr("disabled", false);
 	}else{
 		$("#role_selection .btn").attr("disabled", true);

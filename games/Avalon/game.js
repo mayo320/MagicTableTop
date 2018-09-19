@@ -23,17 +23,72 @@ var Game = function(){
 		vote: 1,
 		quest: 2
 	}
-	var gameState = GameState.king;
+	var gameState = GameState.selecting_roles;
 	
 	var currentKing = -1; // id of current king
 	var currentQuesting = []; // IDs of players who go on questing
 
+	var questDistribution = {
+		5: [2,3,2,3,3],
+		6: [2,3,3,3,4],
+		7: [2,3,3,-4,4], // -ve means need 2 fails
+		8: [3,4,4,-5,5], // this is for 8+
+	}
 	var questNumber = [2,3,2,3,3] // how many players required for each quest
+	var questResults = [0,0,0,0,0] // 1 indicates failure
 	var currQuest = 0;
 
 	var lastVotingResult = {};
 
 	var initialized = false;
+
+	// a player should pick available roles in the start
+	var availableRoles = ["Merlin", "Assassin"];
+	var rolesCount = {
+		Merlin: {
+			count: 1, alignment: 0,
+			min: 1, max: 1
+		},
+		Assassin: {
+			count: 1, alignment: 1,
+			min: 1, max: 1
+		},
+		Percival: {
+			count: 0, alignment: 0,
+			min: 0, max: 1
+		},
+		Morgana: {
+			count: 0, alignment: 1,
+			min: 0, max: 1
+		},
+		Oberon: {
+			count: 0, alignment: 1,
+			min: 0, max: 1
+		},
+		Mordred: {
+			count: 0, alignment: 1,
+			min: 0, max: 1
+		},
+		Servant: {
+			count: 0, alignment: 0,
+			min: 0, max: 10
+		},
+		Minion: {
+			count: 0, alignment: 1,
+			min: 0, max: 10
+		},
+		count: 2,
+		alignment: [1, 1],
+		distribution: {
+			// [good, evil]
+			5: [3, 2],
+			6: [4, 2],
+			7: [4, 3],
+			8: [5, 3],
+			9: [6, 3],
+			10: [6, 4],
+		}
+	}
 
 	// required functions
 	this.initPlayers = function(players){
@@ -63,6 +118,8 @@ var Game = function(){
 		html = html.replace("{{ISHOST}}", this.players[playerID].ishost);
 		html = html.replace("{{PLAYERID}}", playerID);
 		html = html.replace("{{PLAYERS}}", JSON.stringify(this.getPlayersData(playerID)));
+		html = html.replace("{{ROLESCOUNT}}", JSON.stringify(rolesCount));
+		html = html.replace("{{GAMESTATE}}", gameState);
 		return html;
 	}
 
@@ -85,10 +142,7 @@ var Game = function(){
 			this.emitPlayerData(playerID);
 
 			if (gameState == GameState.king && playerID == currentKing){
-				this.sendEventToPlayers([currentKing], "GAME_STATE", {
-					ev: "KING",
-					load: questNumber[currQuest]
-				});
+				this.notifyKing();
 			}
 			else if (gameState == GameState.vote && typeof this.players[playerID].vote == "undefined"){
 				this.sendEventToPlayers([playerID], "GAME_STATE", {
@@ -111,6 +165,39 @@ var Game = function(){
 	}
 	this.onReceiveEventFromPlayer = function(playerID, event, payload){
 		switch(event){
+			case "PLAYER_ROLES":
+				switch(payload.ev){
+					case "ADD":
+						var role = payload.role;
+						var a = rolesCount[role].alignment;
+						var pcount = this.playerIDs.length;
+						if (rolesCount.count < players.length){
+							if (rolesCount[role].count < rolesCount[role].max &&
+								rolesCount.alignment[a] < rolesCount.distribution[pcount][a]){
+								rolesCount[role].count += 1;
+								rolesCount.count += 1;
+								rolesCount.alignment[a] += 1;
+								availableRoles.push(payload.role);
+							}		
+						}
+						break;
+					case "REMOVE":
+						var role = payload.role;
+						var a = rolesCount[role].alignment;
+						var pcount = this.playerIDs.length;
+						if (rolesCount[role].count > rolesCount[role].min &&
+							rolesCount.alignment[a] > 0){
+							rolesCount[role].count -= 1;
+							rolesCount.count -= 1;
+							rolesCount.alignment[a] -= 1;
+							availableRoles.slice(availableRoles.indexOf(payload.role), 1);
+						}
+						break;
+					case "CONFIRM":
+						this.startGame();
+						break;
+				}
+				break;
 			case "PLAYER_KING_SELECT":
 				// payload is a list of IDs
 				// king selected a list of players
@@ -140,10 +227,7 @@ var Game = function(){
 						// voting did not pass
 						this.incrementKing();
 						gameState = GameState.king;
-						this.sendEventToPlayers([currentKing], "GAME_STATE", {
-							ev: "KING",
-							load: questNumber[currQuest]
-						})
+						this.notifyKing();
 					}else{
 						// voting passed
 						gameState = GameState.quest;
@@ -162,25 +246,35 @@ var Game = function(){
 				// payload is bool
 				this.players[playerID].quest = payload;
 				var allvote = true;
-				var questres = 0;
+				var failures = 0;
 				this.loopPlayers((id, p) => {
 					if (currentQuesting.indexOf(id) >= 0){
 						if (typeof p.quest == "undefined"){
 							allvote = false;
 						}else{
-							questres += p.quest ? 1 : -1;
+							failures += p.quest ? 0 : 1;
 						}
 					}
 				})
 				if (allvote){
-					this.sendEventToMain("QUEST_RESULT", questres >= 0);
+					this.sendEventToMain("QUEST_RESULT", failures);
 					this.incrementKing();
 					gameState = GameState.king;
+
+					if (failures > 0){
+						if (questNumber[currQuest] < 0 && failure >= 2){
+							questResults[currQuest] = 1;
+						}else if(questNumber[currQuest] > 0){
+							questResults[currQuest] = 1;
+						}
+					}
+
+					if (questResults.reduce((acc, x)=>acc + (x > 0 ? 1 : 0), 0) > 2){
+						// evils win TODO
+					}
+
 					currQuest += 1;
-					this.sendEventToPlayers([currentKing], "GAME_STATE", {
-						ev: "KING",
-						load: questNumber[currQuest]
-					})
+					this.notifyKing();
 				}
 				break;
 			case "EMIT":
@@ -200,6 +294,7 @@ var Game = function(){
 			current_king: currentKing,
 			players_onquest: currentQuesting,
 			last_voting_result: lastVotingResult,
+			roles_count: rolesCount,
 			players: Object.keys(this.players).map((k) => {
 				var temp = copy(this.players[k]);
 				temp.role = undefined;
@@ -287,25 +382,36 @@ var Game = function(){
 		// get players to choose available roles
 		initialized = true;
 		questNumber = [2,3,2,3,3];
-		this.initializeRoles();
-		this.initializeKing();
+		gameState = GameState.selecting_roles;
 	}
-	var roleDistribution = {
-		// [good, evil]
-		5: [3, 2],
-		6: [4, 2],
-		7: [4, 3],
-		8: [5, 3],
-		9: [6, 3],
-		10: [6, 4],
-	};
-	// a player should pick available roles in the start
-	var availableRoles = ["Merlin", "Assassin", "Servant", "Minion", "Servant"];
+	this.startGame = function(){
+		// called when roles are selected
+		if (availableRoles.length == this.playerIDs.length){
+			gameState = GameState.king;
+			this.initializeRoles();
+			this.initializeKing();
+			// set initial quests
+			var pcount = this.playerIDs[pcount];
+			if (p < 9 && p in questDistribution){
+				questNumber = questDistribution[p];
+			}else if (p > 8){
+				questNumber = questDistribution[8];
+			}else if (p < 5){
+				questNumber = questDistribution[5];
+			}
+
+			this.sendEventToAll("GAME_START", 1);
+			this.emitData();
+			for(var i in this.playerIDs){
+				var id = parseInt(this.playerIDs[i]);
+				this.emitPlayerData(id);
+			}
+			this.notifyKing();
+		}
+	}
 
 	this.initializeRoles = function(){
-		if (this.playerIDs.length in roleDistribution || true){
-			// var distribution = copy(roleDistribution[this.playerIDs.length]);
-
+		if (this.playerIDs.length in rolesCount.distribution || true){
 			for (var i = 0; i < this.playerIDs.length; i++){
 				var p = this.players[this.playerIDs[i]];
 				p.role = availableRoles.splice(randInt(0, availableRoles.length), 1)[0];
@@ -331,6 +437,13 @@ var Game = function(){
 				break;
 			}
 		}
+	}
+
+	this.notifyKing = function(){
+		this.sendEventToPlayers([currentKing], "GAME_STATE", {
+			ev: "KING",
+			load: questNumber[currQuest]
+		});
 	}
 
 
