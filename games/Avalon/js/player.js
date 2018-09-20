@@ -298,6 +298,7 @@ function sendRoles(){
 }
 function addRole(obj, role){
 	var pcount = players.length;
+	pcount = pcount < 5 ? 5 : pcount;
 	if (rolesCount.count < players.length){
 		if (rolesCount[role].count < rolesCount[role].max &&
 			numOfAlignment(roles[role].alignment) < rolesCount.distribution[pcount][roles[role].alignment]){
@@ -309,7 +310,7 @@ function addRole(obj, role){
 				role: role
 			});
 		}		
-		$(obj).closest(".list-group-item").find(".num").html(roles[role].count);
+		$(obj).closest(".list-group-item").find(".num").html(rolesCount[role].count);
 	}
 	if (rolesCount.count == players.length){
 		$("#role_selection .btn").attr("disabled", false);
@@ -324,7 +325,7 @@ function removeRole(obj, role){
 		rolesCount[role].count -= 1;
 		rolesCount.count -= 1;
 		rolesCount.alignment[roles[role].alignment] -= 1;
-		$(obj).closest(".list-group-item").find(".num").html(roles[role].count);
+		$(obj).closest(".list-group-item").find(".num").html(rolesCount[role].count);
 		socket.sendEvent("PLAYER_ROLES", {
 			ev: "REMOVE",
 			role: role
@@ -339,3 +340,4 @@ function removeRole(obj, role){
 		$("#role_selection .btn").attr("disabled", true);
 	}
 }
+

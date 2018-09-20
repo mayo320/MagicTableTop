@@ -11,11 +11,54 @@
 	<script src="/js/bootstrap.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="/js/clientsocket.js"></script>
+	<script src="/games/Avalon/js/global.js"></script>
 	<script type="text/javascript">
 		var backend_players = {{PLAYERS}};
+		var initializingState = {{GAMESTATE}};
+		var rolesCount = {{ROLESCOUNT}};
+		var availableRoles = {{AVAILABLEROLES}};
 	</script>
 	<script src="/games/Avalon/js/main.js"></script>
 
-	
+	<div id="selecting_roles">
+		<div class="msg">
+			<h3> > Host please select available roles in this game.</h3>
+		</div>
+		<div style="top: 0;" id="good">
+			<h2>GOOD</h2>
+			<ul>
+				<li class="role template">
+					<div>
+						<img src="">
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div style="bottom: 0;" id="evil">
+			<h2>EVIL</h2>
+			<ul>
+			</ul>
+		</div>
+	</div>
+
+	<div id="game-frame">
+		<div id="quest_map">
+			<ul id="quests">
+				<li class="quest"><h1>5</h1></li>
+				<li class="quest"><h1>5</h1></li>
+				<li class="quest"><h1>5</h1></li>
+				<li class="quest"><h1>5</h1></li>
+				<li class="quest"><h1>5</h1></li>
+			</ul>
+			<ul id="rejects">
+				<li class="reject"></li>
+				<li class="reject"></li>
+				<li class="reject"></li>
+				<li class="reject"></li>
+				<li class="reject"></li>
+			</ul>
+		</div>
+	</div>
+
 </body>
 </html>

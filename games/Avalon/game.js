@@ -21,7 +21,8 @@ var Game = function(){
 		selecting_roles: -1,
 		king: 0,
 		vote: 1,
-		quest: 2
+		quest: 2,
+		end: 3
 	}
 	var gameState = GameState.selecting_roles;
 	
@@ -39,6 +40,7 @@ var Game = function(){
 	var currQuest = 0;
 
 	var lastVotingResult = {};
+	var numRejects = 0;
 
 	var initialized = false;
 
@@ -109,8 +111,13 @@ var Game = function(){
 	}
 	// initPlayers would already be called
 	this.initMainHTML = function(html){
-		this.initializeGame();
+		if (!initialized){
+			this.initializeGame();
+		}
 		html = html.replace("{{PLAYERS}}", JSON.stringify(this.players));
+		html = html.replace("{{GAMESTATE}}", gameState);
+		html = html.replace("{{ROLESCOUNT}}", JSON.stringify(rolesCount));
+		html = html.replace("{{AVAILABLEROLES}}", JSON.stringify(availableRoles));
 		return html;
 	}
 	this.initPlayerHTML = function(playerID, html){
@@ -136,6 +143,7 @@ var Game = function(){
 
 	// Fill these out
 	this.onPlayerConnect = function(playerID){
+		this.sendEventToMain("PLAYER_CONNECT", playerID);
 		// broadcast data to this player
 		if(initialized){
 			this.emitData();
@@ -171,13 +179,15 @@ var Game = function(){
 						var role = payload.role;
 						var a = rolesCount[role].alignment;
 						var pcount = this.playerIDs.length;
-						if (rolesCount.count < players.length){
+						pcount = pcount < 5 ? 5 : pcount; // for testing purposes
+						if (rolesCount.count < pcount){
 							if (rolesCount[role].count < rolesCount[role].max &&
 								rolesCount.alignment[a] < rolesCount.distribution[pcount][a]){
 								rolesCount[role].count += 1;
 								rolesCount.count += 1;
 								rolesCount.alignment[a] += 1;
 								availableRoles.push(payload.role);
+								this.sendEventToMain("ROLES", availableRoles);
 							}		
 						}
 						break;
@@ -190,7 +200,8 @@ var Game = function(){
 							rolesCount[role].count -= 1;
 							rolesCount.count -= 1;
 							rolesCount.alignment[a] -= 1;
-							availableRoles.slice(availableRoles.indexOf(payload.role), 1);
+							availableRoles.splice(availableRoles.indexOf(payload.role), 1);
+							this.sendEventToMain("ROLES", availableRoles);
 						}
 						break;
 					case "CONFIRM":
@@ -225,9 +236,17 @@ var Game = function(){
 				if (allvote){
 					if (voteresult < 0){
 						// voting did not pass
-						this.incrementKing();
-						gameState = GameState.king;
-						this.notifyKing();
+						numRejects += 1;
+						if (numRejects >= 5){
+							// evils win
+							this.sendEventToMain("GAME_END", {winner:1});
+							gameState = GameState.end;
+						}else{
+							this.incrementKing();
+							gameState = GameState.king;
+							this.notifyKing();
+						}
+						this.emitData();
 					}else{
 						// voting passed
 						gameState = GameState.quest;
@@ -257,7 +276,6 @@ var Game = function(){
 					}
 				})
 				if (allvote){
-					this.sendEventToMain("QUEST_RESULT", failures);
 					this.incrementKing();
 					gameState = GameState.king;
 
@@ -267,14 +285,28 @@ var Game = function(){
 						}else if(questNumber[currQuest] > 0){
 							questResults[currQuest] = 1;
 						}
+					}else{
+						questResults[currQuest] = -1; // -1 means quest passed
 					}
 
+					// this.sendEventToMain("QUEST_RESULT", {
+					// 	num_failures: failures,
+					// 	quest_failed: questResults[currQuest] > 0
+					// });
+
 					if (questResults.reduce((acc, x)=>acc + (x > 0 ? 1 : 0), 0) > 2){
-						// evils win TODO
+						// evils win
+						this.sendEventToMain("GAME_END", {winner:1});
+						gameState = GameState.end;
+					}else if(questResults.reduce((acc, x)=>acc + (x < 0 ? 1 : 0), 0) > 2){
+						// good wins
+						this.sendEventToMain("GAME_END", {winner:0});
+						gameState = GameState.end;
 					}
 
 					currQuest += 1;
 					this.notifyKing();
+					this.emitData();
 				}
 				break;
 			case "EMIT":
@@ -282,7 +314,11 @@ var Game = function(){
 				this.emitPlayerData(playerID);
 		}
 	}
-	this.onReceiveEventFromMain = function(event, payload){}
+	this.onReceiveEventFromMain = function(event, payload){
+		if (event == "EMIT"){
+			this.emitData();
+		}
+	}
 
 	// optional functions
 	this.emitData = function(){
@@ -290,11 +326,13 @@ var Game = function(){
 		var data = {
 			current_quest: currQuest,
 			all_quests: questNumber,
+			quest_results: questResults,
 			game_state: gameState,
 			current_king: currentKing,
 			players_onquest: currentQuesting,
 			last_voting_result: lastVotingResult,
 			roles_count: rolesCount,
+			num_rejects: numRejects,
 			players: Object.keys(this.players).map((k) => {
 				var temp = copy(this.players[k]);
 				temp.role = undefined;
@@ -391,7 +429,7 @@ var Game = function(){
 			this.initializeRoles();
 			this.initializeKing();
 			// set initial quests
-			var pcount = this.playerIDs[pcount];
+			var p = this.playerIDs.length;
 			if (p < 9 && p in questDistribution){
 				questNumber = questDistribution[p];
 			}else if (p > 8){
