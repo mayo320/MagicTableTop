@@ -42,7 +42,7 @@ var App = function(){
 	 		var gameConfig = config.games[i];
 	 		if (!gameConfig.disabled){
 			 	var gameObjectPath = path.resolve(global.root_path + "/games/" + gameConfig.name + "/game.js");
-		 		var game = new Game(require(gameObjectPath), session);
+		 		var game = new Game(gameObjectPath, session);
 
 		 		if (typeof game != "undefined"){
 		 			games.push(game);
@@ -125,6 +125,7 @@ var App = function(){
 		if (game != null){
 			console.log("Starting game " + gameName + "...");
 			currentGame = game;
+			game.init();
 			game.setupHTML(app);
 			game.setupSocketIO(io);
 			game.startGame();

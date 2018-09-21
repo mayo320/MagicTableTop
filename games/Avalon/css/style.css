@@ -17,7 +17,7 @@ hr{
 	display: none !important;
 }
 
-#game-frame, #selecting_roles{
+#game-frame, #selecting_roles, #game_end{
 	position: absolute; top: 0; left: 0; height: 100%; width: 100%;
 }
 #selecting_roles h2{
@@ -94,4 +94,9 @@ hr{
 }
 #players_cont .player .isking.true::after{
 	content: "KING"; color: orange;
+}
+
+#game_end{
+	display: flex; align-items: center; justify-content: center; 
+	background: rgba(0,0,0,0.7);
 }

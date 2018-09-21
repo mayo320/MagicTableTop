@@ -489,4 +489,4 @@ var Game = function(){
 
 }
 
-module.exports = new Game();
+module.exports = Game;

@@ -11,14 +11,15 @@ var MTSocket = function(soc_type){
 		console.log("Returning home...");
 		window.location.href = url;
 	});
-
 	this.onReceiveEvent = function(event, callback){
 		socket.on(event, (payload) => callback(payload));
 	}
+	this.on = this.onReceiveEvent;
 
 	this.sendEvent = function(event, payload){
 		socket.emit(event, payload);
 	}
+	this.send = this.sendEvent;
 
 	this.restartGame = function(){
 		console.log("Requesting server to restart game...");

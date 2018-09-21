@@ -50,6 +50,9 @@ $(document).ready(function(){
 		console.log(payload);
 		voting_results = payload.last_voting_result;
 		UIUpdateVotingResult();
+		if (payload.game_state == GameState.end && isHost){
+			sendGameStatus("END",0);
+		}
 	});
 	socket.onReceiveEvent("ROLES_INFO", function(payload){
 		rolesCount = payload;
@@ -259,6 +262,11 @@ function sendGameStatus(ev, load){
 			$popup.find(".yes").attr("onclick", "sendQuestResult("+load+")");
 			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
 			break;
+		case "END":
+			$popup.find(".header").html("GAME OVER");
+			$popup.find(".body").html("Would you like to restart or go home.")
+			$popup.find(".yes").html("Restart").attr("onclick", "{socket.restartGame()}");
+			$popup.find(".no").html("Home").attr("onclick", "{socket.returnHome()}");
 	}
 }
 

@@ -4,23 +4,27 @@ var path = require("path");
 var fs = require("fs");
 var express = require("express");
 
-var Game = function(gameObject, session){
-	this.gameObject = gameObject;
-	this.name = gameObject.name;
+var Game = function(gameObjectPath, session){
+	var gameObject = require(gameObjectPath);
+	this.gameObject = new gameObject();
+	this.name = this.gameObject.name;
 	this.home_path = path.resolve(global.root_path + "/games/" + this.name);
-	this.player_count = gameObject.player_count;
-	this.playtime = gameObject.playtime;
-	this.cover_img = gameObject.cover_img ? gameObject.cover_img : "";
+	this.player_count = this.gameObject.player_count;
+	this.playtime = this.gameObject.playtime;
+	this.cover_img = this.gameObject.cover_img ? this.gameObject.cover_img : "";
 
 	this.playersIO;
 	this.mainIO;
 	this.players; // list of Player objects
 	this.session = session;
 
-	this.mainHTML = path.resolve(this.home_path + "/" + (gameObject.mainHTML ? "index.html" : gameObject.mainHTML));
-	this.playerHTML = path.resolve(this.home_path + "/" + (gameObject.playerHTML ? "player.html" : gameObject.playerHTML));
+	this.mainHTML = path.resolve(this.home_path + "/" + (this.gameObject.mainHTML ? "index.html" : this.gameObject.mainHTML));
+	this.playerHTML = path.resolve(this.home_path + "/" + (this.gameObject.playerHTML ? "player.html" : this.gameObject.playerHTML));
 
 	// Functions
+	this.init = function(){
+		this.gameObject = new gameObject();
+	}
 	this.startGame = function(){
 		this.session.ingame = true;
 		this.players = this.session.players;
@@ -59,6 +63,7 @@ var Game = function(gameObject, session){
 				this.mainIO.connected[clients[i]].leave(this.name);
 			}
 		});
+		// delete this.gameObject;
 	}
 	this.playerJoin = function(player){
 		player.socket.join(this.name);

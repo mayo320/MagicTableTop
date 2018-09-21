@@ -69,4 +69,4 @@ var Game = function(){
 	// optional functions
 }
 
-module.exports = new Game();
+module.exports = Game;
