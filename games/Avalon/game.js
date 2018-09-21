@@ -259,6 +259,7 @@ var Game = function(){
 					var load = {};
 					this.loopPlayers((id, p) => {load[id] = p.vote});
 					this.sendEventToAll("VOTING_RESULT", load);
+					this.emitData();
 				}
 				break;
 			case "PLAYER_QUEST":
@@ -281,9 +282,9 @@ var Game = function(){
 
 					if (failures > 0){
 						if (questNumber[currQuest] < 0 && failure >= 2){
-							questResults[currQuest] = 1;
+							questResults[currQuest] = failures;
 						}else if(questNumber[currQuest] > 0){
-							questResults[currQuest] = 1;
+							questResults[currQuest] = failures;
 						}
 					}else{
 						questResults[currQuest] = -1; // -1 means quest passed
@@ -302,10 +303,11 @@ var Game = function(){
 						// good wins
 						this.sendEventToMain("GAME_END", {winner:0});
 						gameState = GameState.end;
+					}else{
+						currQuest += 1;
+						this.notifyKing();
 					}
-
-					currQuest += 1;
-					this.notifyKing();
+					
 					this.emitData();
 				}
 				break;

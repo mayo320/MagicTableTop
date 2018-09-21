@@ -332,12 +332,11 @@ function removeRole(obj, role){
 		});
 	}
 
-
-
 	if (rolesCount.count == players.length){
 		$("#role_selection .btn").attr("disabled", false);
 	}else{
 		$("#role_selection .btn").attr("disabled", true);
 	}
 }
+
 

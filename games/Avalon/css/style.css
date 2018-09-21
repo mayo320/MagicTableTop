@@ -9,6 +9,9 @@ li{
 ul{
 	padding: 0;
 }
+hr{
+    border-top: 1px solid rgba(255,255,255,.5);
+}
 
 .hidden{
 	display: none !important;
@@ -51,7 +54,7 @@ ul{
 	width: 50rem; height: 30rem; border: 1px solid white; position: relative;
 }
 #quests{
-	position: absolute; top: 5rem; left: 2rem;
+	position: absolute; top: 8rem; left: 2rem;
 }
 #quests .quest{
 	border: 1px solid white; 
@@ -77,4 +80,18 @@ ul{
 }
 #rejects .reject.fill{
 	background: lightgrey;
+}
+
+#players_cont{
+	width: 100%; height: 100%; position: fixed; top: 0; left: 0;
+}
+#players_cont .player{
+	position: fixed; border: 1px solid lightgrey; border-radius: 1rem;
+	width: 10rem; height: 10rem; text-align: center;
+}
+#players_cont .player .onquest.true::after{
+	content: "ON QUEST"; color: lightgreen;
+}
+#players_cont .player .isking.true::after{
+	content: "KING"; color: orange;
 }

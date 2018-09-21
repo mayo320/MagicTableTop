@@ -1,5 +1,6 @@
 
 var data = {};
+var players = [];
 
 var roletemplate = "";
 $(document).ready(function(){
@@ -15,12 +16,14 @@ $(document).ready(function(){
 		updateUIRolesSelection();
 	});
 	socket.onReceiveEvent("GAME_END", function(payload){
-		console("GAME END, WINNER IS THE " + (payload.winner == 1 ? "EVIL" : "GOOD") + " FACTION");
+		console.log("GAME END, WINNER IS THE " + (payload.winner == 1 ? "EVIL" : "GOOD") + " FACTION");
 	});
 	socket.onReceiveEvent("EMIT", function(payload){
 		data = payload;
 		console.log(data);
 		updateUIQuestMap(data);
+		players = data.players;
+		updateUIPlayerInfo();
 	});
 	socket.onReceiveEvent("GAME_START", function(payload){
 		socket.sendEvent("EMIT", 1);
@@ -88,16 +91,18 @@ function updateUIRolesSelection(){
 function updateUIQuestMap(data){
 	var quests = $(".quest");
 	for(var i = 0; i < 5; i++){
-		if (data.quest_results[i] > 0){
-			$(quests[i]).addClass("fail");
-		}else if(data.quest_results[i] < 0){
-			$(quests[i]).addClass("pass");
-		}
-
 		var val = data.all_quests[i];
 		if (val < 0){
 			val = (-1*val) + "*";
 		}
+
+		if (data.quest_results[i] > 0){
+			$(quests[i]).addClass("fail");
+			val = data.quest_results[i] + "/" + val;
+		}else if(data.quest_results[i] < 0){
+			$(quests[i]).addClass("pass");
+		}
+
 		$(quests[i]).find("h1").html(val);
 	}
 	var k = 0;
@@ -105,5 +110,26 @@ function updateUIQuestMap(data){
 	while (k < data.num_rejects){
 		$(rejects[k]).addClass("fill");
 		k += 1;
+	}
+}
+
+function updateUIPlayerInfo(){
+	var $players = $(".player");
+	$players.addClass("hidden");
+
+	for(var i in players){
+		i = parseInt(i);
+		$($players[i]).removeClass("hidden");
+		$($players[i]).find(".name").html(players[i].name);
+		if (players[i].isKing){
+			$($players[i]).find(".isking").addClass("true");
+		}else{
+			$($players[i]).find(".isking").removeClass("true");
+		}
+		if (data.game_state == GameState.quest && data.players_onquest.indexOf(players[i].id) >= 0){
+			$($players[i]).find(".onquest").addClass("true");
+		}else{
+			$($players[i]).find(".onquest").removeClass("true");
+		}
 	}
 }
