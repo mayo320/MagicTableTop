@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Control Panel</title>
+	<script src="/js/jquery.js"></script>
+	<script src="/js/bootstrap.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/clientsocket.js"></script>
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+	<style type="text/css">
+		body{
+			position: absolute; left: 0; right: 0; margin: 0; width 100%; 
+			height: 100%; background: black; color: white;
+			padding: 1rem;
+		}
+		li{
+			font-size: 1.5rem;
+		}
+		hr{
+			border-top: 1px solid white;
+		}
+		.hidden{
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="state"><h1>CURRENT STATE: <span class="state"></span></h1></div>
+	<hr>
+	<div>
+		<h3>PLAYERS</h3>
+		<ul id="players">
+			<li>JACK</li>
+		</ul>
+	</div>
+	<hr>
+	<div id="gamebtns" class="hidden">
+		<button onclick="returnHome()" class="btn btn-default">RETURN HOME</button>
+		<button onclick="restartGame()" class="btn btn-default">RESTART GAME</button>
+	</div>
+
+	<script type="text/javascript">
+		var socket = new MTSocket("control");
+		var data;
+		socket.on("ev-data", function(load){
+			console.log(load);
+			data = load;
+			update();
+		})
+
+
+		function requestData(){
+			socket.send("ev-data", 1);
+		}
+		function restartGame(){
+			socket.restartGame();
+		}
+		function returnHome(){
+			socket.returnHome();
+		}
+
+		function update(){
+			$("#state .state").html(data.state);
+			$("#gamebtns").addClass("hidden");
+			if (data.state == "GAME"){
+				$("#state .state").html(data.state + " - " + data.game.name);
+				$("#gamebtns").removeClass("hidden");
+			}
+
+			var $ps = $("#players");
+			html = "";
+			for (var i in data.session.players){
+				var p = data.session.players[parseInt(i)];
+				html += "<li>" + p.id + ": " + p.name + " | " + p.ip;
+				if (p.ishost){
+					html += " | HOST"
+				}
+				html += "</li>"
+			}
+			$ps.html(html);
+		}
+
+		requestData();
+	</script>
+</body>
+</html>

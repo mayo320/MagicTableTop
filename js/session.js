@@ -28,6 +28,24 @@ var Session = function(){
 		}
 		return null;
 	}
+
+	this.toJSON = function(){
+		var d = {};
+
+		d.players = [];
+		for(var i in this.players){
+			var p = this.players[parseInt(i)];
+			var pd = {
+				id: p.id,
+				name: p.name, 
+				ip: p.socketip,
+				ishost: p.host
+			};
+			d.players.push(pd);
+		}
+
+		return d;
+	}
 }
 
 module.exports = new Session();

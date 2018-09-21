@@ -28,6 +28,7 @@ var App = function(){
 	var currentGame;
 	var playersIO;
 	var mainIO;
+	var controlIO;
 
 	var app; // the express object
 	var io; // the socket.io object
@@ -112,6 +113,11 @@ var App = function(){
 				}
 			}
 		});
+
+		app.get("/control", (req, res) => {
+			var html = fs.readFileSync(path.resolve(global.root_path + "/control.html"), {encoding: "utf8"});
+			res.send(html);
+		});
 	}
 
 	var startGame = function(gameName){
@@ -174,6 +180,24 @@ var App = function(){
 		player.socket.emit("ev-joined", pinfo);
 		updateLobbyHost();
 	}
+	var restartGame = function(){
+		console.log("Restarting game " + currentGame.name + "...");
+		currentGame.endGame();
+		startGame(currentGame.name);
+		mainIO.emit("ev-restartgame", true);
+		playersIO.emit("ev-restartgame", true);
+	}
+	var returnHome = function(){
+		console.log("Returning home...");
+		currentGame.endGame();
+		currentGame = undefined;
+		for(var i in session.players){
+			var p = session.players[parseInt(i)];
+			if (p.connected) p.automaticRejoin = true;
+		}
+		mainIO.emit("ev-returnhome", `http://${config.address}:${config.port}/main`);
+		playersIO.emit("ev-returnhome", `http://${global.addresses[0]}:${config.port}`);
+	}
 
 	/* setupSocketIO(io)
 	 * Set up sockets
@@ -184,6 +208,7 @@ var App = function(){
 		io = _io;
 		playersIO = io.of("/player");
 		mainIO = io.of("/main");
+		controlIO = io.of("/control");
 
 		// Settings IO on players
 		playersIO.on("connection", function(socket){
@@ -225,22 +250,10 @@ var App = function(){
 			});
 
 			socket.on("ev-restartgame", function(payload){
-				console.log("Restarting game " + currentGame.name + "...");
-				currentGame.endGame();
-				startGame(currentGame.name);
-				mainIO.emit("ev-restartgame", true);
-				playersIO.emit("ev-restartgame", true);
+				restartGame();
 			});
 			socket.on("ev-returnhome", function(payload){
-				console.log("Returning home...");
-				currentGame.endGame();
-				currentGame = undefined;
-				for(var i in session.players){
-					var p = session.players[parseInt(i)];
-					if (p.connected) p.automaticRejoin = true;
-				}
-				mainIO.emit("ev-returnhome", `http://${config.address}:${config.port}/main`);
-				playersIO.emit("ev-returnhome", `http://${global.addresses[0]}:${config.port}`);
+				returnHome();
 			});
 
 			socket.on("disconnect", function(){
@@ -254,6 +267,25 @@ var App = function(){
 					});
 					updateLobbyHost();
 				}
+			});
+		});
+
+		controlIO.on("connection", function(socket){
+			socket.on("ev-data", function(payload){
+				var d = {};
+				d.state = "LOBBY";
+				if (typeof currentGame != "undefined"){
+					d.game = currentGame.toMainpageJson();
+					d.state = "GAME";
+				}
+				d.session = session.toJSON();
+				controlIO.emit("ev-data", d);
+			});
+			socket.on("ev-restartgame", function(payload){
+				restartGame();
+			});
+			socket.on("ev-returnhome", function(payload){
+				returnHome();
 			});
 		});
 	}
