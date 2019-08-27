@@ -22,9 +22,11 @@ var cur_role_count = 0;
 var voting_results = { // indexing is player id
 	0: false, 1: true, 2: true, 3: true, 4: false 
 };
-var kingSelectedPlayers = [];
+var kingSelectedPlayers = []; // list of indices
 var kingSelectableNum = 0;
+var assassinSelectedPlayers = -1; // the index of target
 var king_players_template = "";
+var ass_players_template = "";
 var other_players_template = "";
 var voting_result_template = "";
 var socket;
@@ -36,7 +38,6 @@ $(document).ready(function(){
 	});
 	socket.onReceiveEvent("GAME_STATE", function(payload){
 		console.log(payload);
-		UIUpdateKingPlayers();
 		UIUpdateGameStatus(payload.ev, payload.load);
 	});
 	socket.onReceiveEvent("PLAYERS_INFO", function(payload){
@@ -45,6 +46,9 @@ $(document).ready(function(){
 		updatePlayerVar();
 		UIUpdateOtherPlayers();
 		UIUpdatePlayerRole();
+		
+		UIUpdateKingPlayers();
+		UIUpdateAssassinPlayers();
 	});
 	socket.onReceiveEvent("EMIT", function(payload){
 		console.log(payload);
@@ -74,6 +78,9 @@ $(document).ready(function(){
 	king_players_template = $("#king .player.template").parent().html();
 	$("#king .player.template").parent().html("");
 	// UIUpdateKingPlayers();
+	
+	ass_players_template = $("#assassinate .player.template").parent().html();
+	$("#assassinate .player.template").parent().html("");
 
 	other_players_template = $("#other-players #pallies").html();
 	$("#other-players #pallies").html("");
@@ -142,6 +149,11 @@ function UIUpdateGameStatus(ev, payload){
 		case "QUEST":
 			$("#game-state #onquest").removeClass("hidden");
 			break;
+		case "ASSASSINATE":
+			if (player.role == "Assassin"){
+				$("#game-state #assassinate").removeClass("hidden");
+			}
+			break;
 		default:
 			$("#game-state .card-body").addClass("hidden");
 			break;
@@ -150,14 +162,30 @@ function UIUpdateGameStatus(ev, payload){
 
 function UIUpdateKingPlayers(){
 	var $list = $("#king .row");
-	$list.html("");
 	kingSelectedPlayers = [];
+	$list.html("");
 	$.each(players, function(i, player){
 		$list.append(king_players_template);
 		var $player = $list.find(".player:last");
 		$player.attr("p-name", player.name)
 		$player.attr("p-id", player.id)
 		$player.find("h3").html(player.name);
+	});
+}
+
+function UIUpdateAssassinPlayers(){
+	var $list = $("#assassinate .row");
+	$("#assassinate .btn").attr("disabled", true);
+	assassinSelectedPlayers = -1;
+	$list.html("");
+	$.each(players, function(i, p){
+		if (p.id != player.id){
+			$list.append(ass_players_template);
+			var $player = $list.find(".player:last");
+			$player.attr("p-name", p.name)
+			$player.attr("p-id", p.id)
+			$player.find("h3").html(p.name);
+		}
 	});
 }
 
@@ -225,14 +253,15 @@ function hideID(id){
 }
 
 function selectPlayer(obj){
-	var name = $(obj).attr("p-id");
-
+	var p_id = $(obj).attr("p-id");
+	var king_ind = kingSelectedPlayers.indexOf(p_id);
+	
 	if($(obj).hasClass("selected")){
 		$(obj).removeClass("selected");
-		kingSelectedPlayers.splice(kingSelectedPlayers.indexOf(name), 1);
+		if (king_ind >= 0) kingSelectedPlayers.splice(king_ind, 1);
 	}else{
 		$(obj).addClass("selected");
-		if (kingSelectedPlayers.indexOf(name) < 0) kingSelectedPlayers.push(name);
+		if (king_ind < 0) kingSelectedPlayers.push(p_id);
 	}
 
 	if (kingSelectedPlayers.length == kingSelectableNum && kingSelectableNum != 0){
@@ -240,7 +269,16 @@ function selectPlayer(obj){
 	}else{
 		$("#king .btn").attr("disabled", true);
 	}
+}
 
+function selectTarget(obj){
+	var p_id = $(obj).attr("p-id");
+	
+	$("#assassinate .row div").removeClass("selected");
+	$(obj).addClass("selected");
+	
+	assassinSelectedPlayers = p_id;
+	$("#assassinate .btn").attr("disabled", false);
 }
 
 function sendGameStatus(ev, load){
@@ -271,11 +309,22 @@ function sendGameStatus(ev, load){
 			$popup.find(".yes").attr("onclick", "sendQuestResult("+load+")");
 			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
 			break;
+		case "ASSASSINATE":
+			$popup.find(".header").html("Assassination");
+			var name = "";
+			for (var i = 0; i < players.length; i++){
+				if (players[i].id == assassinSelectedPlayers) name = players[i].name;
+			}
+			$popup.find(".body").html("You want to assassinate " + name + "?");
+			$popup.find(".yes").attr("onclick", "sendAssasinate("+ assassinSelectedPlayers +")");
+			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			break;
 		case "END":
 			$popup.find(".header").html("GAME OVER");
 			$popup.find(".body").html("Would you like to restart or go home.")
 			$popup.find(".yes").html("Restart").attr("onclick", "{socket.restartGame()}");
 			$popup.find(".no").html("Home").attr("onclick", "{socket.returnHome()}");
+			break;
 	}
 }
 

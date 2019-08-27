@@ -3,7 +3,8 @@ var GameState = {
 	king: 0,
 	vote: 1,
 	quest: 2,
-	end: 3
+	assassinate: 3,
+	end: 4
 }
 var roles = {
 	Merlin: {

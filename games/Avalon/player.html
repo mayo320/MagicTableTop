@@ -60,6 +60,20 @@
 					<button onclick="sendGameStatus('QUEST', true)" class="btn btn-success" style="min-width:30%; float: right;"><h4>PASS</h4></button>
 					<br>
 				</div>
+				<div id="assassinate" class="item">
+					<h3>You are Assassin!</h3>
+					<h4>Choose a person to assassinate! You win if you assassinate Merlin!</h4>
+					<hr>
+					<div class="container">
+						<div class="row">
+							<div class="player col-6 template" onclick="selectTarget(this)">
+								<h3>Jack</h3>
+							</div>
+						</div>
+					</div>
+					<hr>
+					<button class="btn btn-default" disabled onclick="sendGameStatus('ASSASSINATE')"><h4>ASSASSINATE</h4></button>
+				</div>
 			</div>
 		</div>
 

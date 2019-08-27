@@ -17,7 +17,12 @@ $(document).ready(function(){
 	});
 	socket.onReceiveEvent("GAME_END", function(payload){
 		console.log("GAME END, WINNER IS THE " + (payload.winner == 1 ? "EVIL" : "GOOD") + " FACTION");
+		$("#assassinate").addClass("hidden");
 		$("#game_end").removeClass("hidden").find(".faction").html(payload.winner == 1 ? "EVIL" : "GOOD");
+	});
+	socket.onReceiveEvent("ASSASSINATE", function(payload){
+		console.log("Assassination");
+		$("#assassinate").removeClass("hidden");
 	});
 	socket.onReceiveEvent("EMIT", function(payload){
 		data = payload;

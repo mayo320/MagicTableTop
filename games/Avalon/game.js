@@ -22,7 +22,8 @@ var Game = function(){
 		king: 0,
 		vote: 1,
 		quest: 2,
-		end: 3
+		assassinate: 3,
+		end: 4
 	}
 	var gameState = GameState.selecting_roles;
 	
@@ -45,7 +46,9 @@ var Game = function(){
 	var initialized = false;
 
 	// a player should pick available roles in the start
-	var availableRoles = ["Merlin", "Assassin"];
+	var roleAssassin = "Assassin";
+	var roleMerlin = "Merlin";
+	var availableRoles = [roleMerlin, roleAssassin];
 	var rolesCount = {
 		Merlin: {
 			count: 1, alignment: 0,
@@ -166,6 +169,13 @@ var Game = function(){
 					load: 1
 				});
 			}
+			else if(gameState == GameState.assassinate && 
+					this.players[playerID].role == roleAssassin){
+				this.sendEventToPlayers([playerID], "GAME_STATE", {
+					ev: "ASSASSINATE",
+					load: 1
+				});
+			}
 		}
 	}
 	this.onPlayerDisconnect = function(playerID){
@@ -234,11 +244,11 @@ var Game = function(){
 					}
 				});
 				if (allvote){
-					if (voteresult < 0){
+					if (voteresult <= 0){
 						// voting did not pass
 						numRejects += 1;
 						if (numRejects >= 5){
-							// evils win
+							// evils win when number of rejects pass 5
 							this.sendEventToMain("GAME_END", {winner:1});
 							gameState = GameState.end;
 						}else{
@@ -249,7 +259,7 @@ var Game = function(){
 						this.emitData();
 					}else{
 						// voting passed
-						numRejects = 0;
+						numRejects = 0; // ?? Does reject reset on a pass
 						gameState = GameState.quest;
 						this.loopPlayers((id, p) => {p.quest = undefined;});
 						this.sendEventToPlayers(currentQuesting, "GAME_STATE", {
@@ -301,15 +311,33 @@ var Game = function(){
 						this.sendEventToMain("GAME_END", {winner:1});
 						gameState = GameState.end;
 					}else if(questResults.reduce((acc, x)=>acc + (x < 0 ? 1 : 0), 0) > 2){
-						// good wins
-						this.sendEventToMain("GAME_END", {winner:0});
-						gameState = GameState.end;
+						// good wins. Assassin can choose to assassinate a person TODO
+						gameState = GameState.assassinate;
+						this.sendEventToMain("ASSASSINATE", {});						
+						this.sendEventToAll("GAME_STATE", {
+							ev: "ASSASSINATE",
+							load: 1
+						});
 					}else{
 						currQuest += 1;
 						this.notifyKing();
 					}
 					
 					this.emitData();
+				}
+				break;
+			case "PLAYER_ASSASSINATE":
+				// payload is the ID of the target
+				if (this.players[playerID].role == roleAssassin){
+					if (this.players[parseInt(payload)].role == roleMerlin){
+						// evils win
+						this.sendEventToMain("GAME_END", {winner:1});
+						gameState = GameState.end;
+					} else {
+						// goods win
+						this.sendEventToMain("GAME_END", {winner:0});
+						gameState = GameState.end;						
+					}
 				}
 				break;
 			case "EMIT":
@@ -362,6 +390,10 @@ var Game = function(){
 		var p = this.players[playerID];
 		var knows = {}
 		switch (p.role){
+			case "Minion":
+			case "Mordred":
+			case "Morgana":
+			case "Assassin":
 			case "Merlin":
 				knows["Assassin"] = "Evil";
 				knows["Morgana"] = "Evil";
@@ -372,29 +404,9 @@ var Game = function(){
 				knows["Merlin"] = "Merlin";
 				knows["Morgana"] = "Merlin";
 				break;
-			case "Assassin":
-				knows["Morgana"] = "Evil";
-				knows["Mordred"] = "Evil";
-				knows["Minion"] = "Evil";
-				break;
-			case "Morgana":
-				knows["Assassin"] = "Evil";
-				knows["Mordred"] = "Evil";
-				knows["Minion"] = "Evil";
-				break;
 			case "Oberon":
-				break;
-			case "Mordred":
-				knows["Assassin"] = "Evil";
-				knows["Morgana"] = "Evil";
-				knows["Minion"] = "Evil";
-				break;
 			case "Servant":
-				break;
-			case "Minion":
-				knows["Assassin"] = "Evil";
-				knows["Morgana"] = "Evil";
-				knows["Mordred"] = "Evil";
+			default:
 				break;
 		}
 

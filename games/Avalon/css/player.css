@@ -27,16 +27,19 @@ ul{
 	color: grey; display: inline-block; float: right;
 }
 
-#game-state #king .player{
+#game-state #king .player,
+#game-state #assassinate .player{
 	display: flex; align-items: center; justify-content: center;
 	padding: 0.2rem;
 }
-#game-state #king .player h3{
+#game-state #king .player h3,
+#game-state #assassinate .player h3{
 	border-radius: 0.3rem; border: 1px solid grey; display: block;
 	width: inherit; line-height: inherit; text-align: center;
 	height: 100%;
 }
-#game-state #king .player.selected h3{
+#game-state #king .player.selected h3,
+#game-state #assassinate .player.selected h3{
 	border: 1px solid white; background: lightblue;
 }
 #game-state .btn{
