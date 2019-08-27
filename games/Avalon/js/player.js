@@ -117,6 +117,10 @@ function updatePlayerVar(){
 			player = p;
 		}
 	});
+	if (typeof player.role != "undefined" && roles[player.role].alignment == 0){
+		// Player is good, cannot fail quests
+		$("#btn-questfail").addClass("hidden");
+	}
 }
 function UIUpdateGameStatus(ev, payload){
 	$("#game-state .item").addClass("hidden");
@@ -147,6 +151,7 @@ function UIUpdateGameStatus(ev, payload){
 function UIUpdateKingPlayers(){
 	var $list = $("#king .row");
 	$list.html("");
+	kingSelectedPlayers = [];
 	$.each(players, function(i, player){
 		$list.append(king_players_template);
 		var $player = $list.find(".player:last");
@@ -160,11 +165,15 @@ function UIUpdateOtherPlayers(){
 	var $list = $("#pallies");
 	$list.html("");
 	$.each(players, function(i, player){
+		$list.append(other_players_template);
+		var $player = $list.find("li:last");
 		if (myID != player.id && player.role){
-			$list.append(other_players_template);
-			var $player = $list.find("li:last");
 			$player.find(".name").html(player.name);
 			$player.find(".role").html(player.role);
+		}
+		else{
+			$player.find(".name").html(player.name);
+			$player.find(".role").html("?");
 		}
 	});	
 }

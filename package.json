@@ -9,11 +9,11 @@
   "author": "Jack Yan",
   "license": "ISC",
   "devDependencies": {
-    "express": "^4.16.3",
-    "helmet": "^3.13.0"
+    "express": "^4.17.1",
+    "helmet": "^3.20.0"
   },
   "dependencies": {
-    "electron": "^2.0.9",
-    "socket.io": "^2.1.1"
+    "electron": "^2.0.18",
+    "socket.io": "^2.2.0"
   }
 }

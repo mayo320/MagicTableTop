@@ -249,6 +249,7 @@ var Game = function(){
 						this.emitData();
 					}else{
 						// voting passed
+						numRejects = 0;
 						gameState = GameState.quest;
 						this.loopPlayers((id, p) => {p.quest = undefined;});
 						this.sendEventToPlayers(currentQuesting, "GAME_STATE", {

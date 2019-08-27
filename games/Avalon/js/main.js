@@ -106,11 +106,11 @@ function updateUIQuestMap(data){
 
 		$(quests[i]).find("h1").html(val);
 	}
-	var k = 0;
+	
 	var rejects = $(".reject");
-	while (k < data.num_rejects){
-		$(rejects[k]).addClass("fill");
-		k += 1;
+	for	(var i = 0; i < rejects.length; i++){
+		if (i < data.num_rejects) $(rejects[i]).addClass("fill");
+		else $(rejects[i]).removeClass("fill");
 	}
 }
 
