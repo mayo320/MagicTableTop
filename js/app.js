@@ -227,7 +227,7 @@ var App = function(){
 					p = session.addPlayer(playername, socket);
 				}else{
 					console.log(playername + " Rejoined");
-					p.name = playername;
+					p.updateName(playername);
 				}
 
 				if (p != null){

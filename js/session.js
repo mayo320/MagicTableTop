@@ -14,7 +14,9 @@ var Session = function(){
 
 	this.addPlayer = function(playername, socket){
 		var player = new Player();
-		player.name = playername;
+		
+		player.session = this;
+		player.updateName(playername);
 		player.update(socket);
 		player.id = this.players.length;
 		this.players.push(player);

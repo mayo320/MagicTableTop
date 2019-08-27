@@ -40,6 +40,10 @@
 					alert("Your name is too short!");
 					return;
 				}
+				if (v.length > 10){
+					alert("Your name is too LONG! (max 10 characters)");
+					return;
+				}
 				socket.emit("ev-playerjoin", v);
 			}
 			function playGame(gameName){
@@ -50,7 +54,7 @@
 		<div id="joining-page" class="">
 			<h1>Hello Player</h1> <hr>
 			<h3>What is your name?</h3>
-			<input type="text" class="playername" maxlength="20">
+			<input type="text" class="playername" maxlength="10">
 			<div> <hr>
 			<button class="btn" onclick="avc()"><h3>Join</h3></button>
 			</div>
