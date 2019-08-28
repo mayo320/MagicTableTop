@@ -29,6 +29,7 @@ var Game = function(){
 	
 	var currentKing = -1; // id of current king
 	var currentQuesting = []; // IDs of players who go on questing
+	var currentVoting = []; // IDs of players currently still have yet to vote
 
 	var questDistribution = {
 		5: [2,3,2,3,3],
@@ -223,6 +224,7 @@ var Game = function(){
 				// payload is a list of IDs
 				// king selected a list of players
 				currentQuesting = payload.map((id) => parseInt(id));
+				currentVoting = Object.keys(this.players).map((id) => parseInt(id));
 				gameState = GameState.vote;
 				this.loopPlayers((id, p) => {p.vote = undefined;});		
 				this.sendEventToAll("GAME_STATE", {
@@ -233,6 +235,10 @@ var Game = function(){
 			case "PLAYER_VOTE":
 				// payload is bool
 				this.players[playerID].vote = payload;
+				var index = currentVoting.indexOf(playerID)
+				if (index >= 0){
+					currentVoting.splice(index, 1);
+				}
 				var allvote = true;
 				var voteresult = 0;
 				this.loopPlayers((id, p) => {
@@ -270,8 +276,8 @@ var Game = function(){
 					var load = {};
 					this.loopPlayers((id, p) => {load[id] = p.vote});
 					this.sendEventToAll("VOTING_RESULT", load);
-					this.emitData();
 				}
+				this.emitData();
 				break;
 			case "PLAYER_QUEST":
 				// payload is bool
@@ -361,6 +367,7 @@ var Game = function(){
 			game_state: gameState,
 			current_king: currentKing,
 			players_onquest: currentQuesting,
+			players_voting: currentVoting,
 			last_voting_result: lastVotingResult,
 			roles_count: rolesCount,
 			num_rejects: numRejects,

@@ -22,7 +22,7 @@
 	<script src="/games/Avalon/js/global.js"></script>
 	<script src="/games/Avalon/js/player.js"></script>
 
-	<div class="game-frame hidden">
+	<div class="game-frame hidden" style="margin-bottom:2rem;">
 		<div class="card" id="game-state">
 			<div class="card-header">
 				<h3>Game Status</h3>
@@ -56,9 +56,8 @@
 					<h3>You are on the QUEST!</h3>
 					<h4>Will you pass or fail the quest?</h4>
 					<hr>
-					<button onclick="sendGameStatus('QUEST', false)" class="btn btn-danger" id="btn-questfail" style="min-width:30%; float: left;"><h4>FAIL</h4></button>
-					<button onclick="sendGameStatus('QUEST', true)" class="btn btn-success" style="min-width:30%; float: right;"><h4>PASS</h4></button>
-					<br>
+					<button onclick="sendGameStatus('QUEST', true)" class="btn btn-success" style="margin-bottom:2px;"><h4>PASS</h4></button>
+					<button onclick="sendGameStatus('QUEST', false)" class="btn btn-danger" id="btn-questfail" style=""><h4>FAIL</h4></button>
 				</div>
 				<div id="assassinate" class="item">
 					<h3>You are Assassin!</h3>
@@ -80,9 +79,9 @@
 		<div class="card">
 		  	<div class="card-header">
 			  	<h3 class="title">Last Voting Result</h3>
-			  	<h3 class="toggle" onclick="hideID('voting_result')">Toggle<span class="caret"></span></h3>
+			  	<!-- <h3 class="toggle" onclick="hideID('voting_result')">Toggle<span class="caret"></span></h3> -->
 		  	</div>
-			<ul class="list-group hidden" id='voting_result'>
+			<ul class="list-group" id='voting_result'>
 				<li class="list-group-item">
 					<h4 class="name">Jack</h4>
 					<h4 class="role accept"></h4>
@@ -155,5 +154,9 @@
 		</div>
 	</div>
 
+	<div id="request_emit">
+		<button class="btn btn-default" onclick="sendRequestEmit()">Refresh Main</button>
+	</div>
+	
 </body>
 </html>

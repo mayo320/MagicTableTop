@@ -64,7 +64,7 @@ hr{
 	display: inline-block; text-align: center; padding-top: 1.6rem; color: white;
 }
 #quests .quest.pass{
-	background: lightblue; color: black;
+	background: lightgreen; color: black;
 }
 #quests .quest.fail{
 	background: tomato; color: black;
@@ -89,14 +89,27 @@ hr{
 	position: fixed; border: 1px solid lightgrey; border-radius: 1rem;
 	width: 10rem; height: 10rem; text-align: center;
 }
-#players_cont .player .onquest.true::after{
+#players_cont .player.onquest .onquest::after{
 	content: "ON QUEST"; color: lightgreen;
 }
-#players_cont .player .isking.true::after{
+#players_cont .player.isking .isking::after{
 	content: "KING"; color: orange;
 }
+#players_cont .player.voting .voting::after{
+	content: "VOTING"; color: tomato;
+}
 
-#game_end{
+#players_cont .player.isking{
+	box-shadow: 0 0 20px orange;
+}
+#players_cont .player.voting{
+	box-shadow: 0 0 20px tomato;
+}
+#players_cont .player.onquest{
+	box-shadow: 0 0 20px lightgreen;
+}
+
+#game_end, #assassinate{
 	display: flex; align-items: center; justify-content: center; 
 	background: rgba(0,0,0,0.7);
 }

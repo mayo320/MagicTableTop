@@ -28,3 +28,6 @@ li{list-style: none;}
 #gamelist ul li{
 	margin: 0.5rem 0; padding: 0.5rem; background: lightgrey; color: black;
 }
+.btn{
+	background:white;
+}

@@ -18,6 +18,7 @@ var players = [
 ];
 var player = {};
 var cur_role_count = 0;
+var playerIsGood = false;
 
 var voting_results = { // indexing is player id
 	0: false, 1: true, 2: true, 3: true, 4: false 
@@ -126,7 +127,7 @@ function updatePlayerVar(){
 	});
 	if (typeof player.role != "undefined" && roles[player.role].alignment == 0){
 		// Player is good, cannot fail quests
-		$("#btn-questfail").addClass("hidden");
+		playerIsGood = true;
 	}
 }
 function UIUpdateGameStatus(ev, payload){
@@ -283,7 +284,10 @@ function selectTarget(obj){
 
 function sendGameStatus(ev, load){
 	$popup = $("#popup");
+	$popup.find(".no").removeClass("hidden");
+	$popup.find(".yes").removeClass("hidden");
 	$popup.removeClass("hidden");
+	
 	switch(ev){
 		case "KING":
 			$popup.find(".header").html("King");
@@ -305,9 +309,16 @@ function sendGameStatus(ev, load){
 			break;
 		case "QUEST":
 			$popup.find(".header").html("Questing");
-			$popup.find(".body").html("You want to " + (load ? "PASS" : "FAIL") + " the quest?");
-			$popup.find(".yes").attr("onclick", "sendQuestResult("+load+")");
-			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			if (!load && playerIsGood){
+				// Good Player is trying to fail
+				$popup.find(".body").html("You are good, you cannot FAIL a quest.");
+				$popup.find(".yes").attr("onclick", '{$("#popup").addClass("hidden");}');
+				$popup.find(".no").addClass("hidden");
+			} else {			
+				$popup.find(".body").html("You want to " + (load ? "PASS" : "FAIL") + " the quest?");
+				$popup.find(".yes").attr("onclick", "sendQuestResult("+load+")");	
+				$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			}
 			break;
 		case "ASSASSINATE":
 			$popup.find(".header").html("Assassination");
@@ -347,6 +358,7 @@ function sendQuestResult(res){
 function sendAssasinate(playerID){
 	// used by Assassin only.
 	$("#popup").addClass("hidden");
+	$("#assassinate").addClass("hidden");
 	socket.sendEvent("PLAYER_ASSASSINATE", playerID);
 }
 function sendRequestEmit(){

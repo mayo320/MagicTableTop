@@ -28,6 +28,7 @@ $(document).ready(function(){
 		data = payload;
 		console.log(data);
 		updateUIQuestMap(data);
+		updateUIMessageInfo(data);
 		players = data.players;
 		updateUIPlayerInfo();
 	});
@@ -94,6 +95,14 @@ function updateUIRolesSelection(){
 	}
 }
 
+function updateUIMessageInfo(data){
+	var msg = "";
+	if (data.game_state == GameState.king) msg = "Waiting for king to select players.";
+	else if (data.game_state == GameState.vote) msg = "Waiting for voting results.";
+	else if (data.game_state == GameState.quest) msg = "Waiting for questing results.";
+	$("#message").html(msg);
+}
+
 function updateUIQuestMap(data){
 	var quests = $(".quest");
 	for(var i = 0; i < 5; i++){
@@ -128,14 +137,19 @@ function updateUIPlayerInfo(){
 		$($players[i]).removeClass("hidden");
 		$($players[i]).find(".name").html(players[i].name);
 		if (players[i].isKing){
-			$($players[i]).find(".isking").addClass("true");
+			$($players[i]).addClass("isking");
 		}else{
-			$($players[i]).find(".isking").removeClass("true");
+			$($players[i]).removeClass("isking");
+		}
+		if (data.game_state == GameState.vote && data.players_voting.indexOf(players[i].id) >= 0){
+			$($players[i]).addClass("voting");
+		}else{
+			$($players[i]).removeClass("voting");
 		}
 		if (data.game_state == GameState.quest && data.players_onquest.indexOf(players[i].id) >= 0){
-			$($players[i]).find(".onquest").addClass("true");
+			$($players[i]).addClass("onquest");
 		}else{
-			$($players[i]).find(".onquest").removeClass("true");
+			$($players[i]).removeClass("onquest");
 		}
 	}
 }
