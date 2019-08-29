@@ -136,7 +136,7 @@ function UIUpdateGameStatus(ev, payload){
 	switch(ev){
 		case "KING":
 			$("#game-state #king").removeClass("hidden");
-			kingSelectableNum = parseInt(payload);
+			kingSelectableNum = Math.abs(parseInt(payload));
 			$("#game-state #king .num").html(payload);
 			break;
 		case "VOTE":

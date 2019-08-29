@@ -35,7 +35,7 @@ var roles = {
 	Mordred: {
 		alignment: 1,
 		description: "You are unknown to Merlin",
-		img: "http://masteryeti.no-ip.biz/resistance/gui/images/Mordred.png"
+		img: "https://ksr-ugc.imgix.net/assets/000/112/218/8dfe4717dc52b024fbf20b9f73ff788e_original.jpg?ixlib=rb-2.1.0&w=680&fit=max&v=1344901092&auto=format&gif-q=50&q=92&s=e535386704746ee2466c397c6051671f"
 	},
 	Servant: {
 		alignment: 0,

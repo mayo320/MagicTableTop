@@ -401,12 +401,16 @@ var Game = function(){
 			case "Mordred":
 			case "Morgana":
 			case "Assassin":
+				knows["Assassin"] = "Evil";
+				knows["Morgana"] = "Evil";
+				knows["Minion"] = "Evil";
+				knows["Mordred"] = "Evil";
+				break;
 			case "Merlin":
 				knows["Assassin"] = "Evil";
 				knows["Morgana"] = "Evil";
 				knows["Oberon"] = "Evil";
 				knows["Minion"] = "Evil";
-				break;
 			case "Percival":
 				knows["Merlin"] = "Merlin";
 				knows["Morgana"] = "Merlin";
