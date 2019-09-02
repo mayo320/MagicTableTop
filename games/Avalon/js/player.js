@@ -194,15 +194,17 @@ function UIUpdateOtherPlayers(){
 	var $list = $("#pallies");
 	$list.html("");
 	$.each(players, function(i, player){
-		$list.append(other_players_template);
-		var $player = $list.find("li:last");
-		if (myID != player.id && player.role){
-			$player.find(".name").html(player.name);
-			$player.find(".role").html(player.role);
-		}
-		else{
-			$player.find(".name").html(player.name);
-			$player.find(".role").html("?");
+		if (myID != player.id){
+			$list.append(other_players_template);
+			var $player = $list.find("li:last");
+			if (player.role){
+				$player.find(".name").html(player.name);
+				$player.find(".role").html(player.role);
+			}
+			else{
+				$player.find(".name").html(player.name);
+				$player.find(".role").html("?");
+			}
 		}
 	});	
 }
