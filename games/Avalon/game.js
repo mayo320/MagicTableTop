@@ -298,7 +298,7 @@ var Game = function(){
 					gameState = GameState.king;
 
 					if (failures > 0){
-						if (questNumber[currQuest] < 0 && failure >= 2){
+						if (questNumber[currQuest] < 0 && failures >= 2){
 							questResults[currQuest] = failures;
 						}else if(questNumber[currQuest] > 0){
 							questResults[currQuest] = failures;
