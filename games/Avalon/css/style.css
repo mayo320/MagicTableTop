@@ -108,6 +108,9 @@ hr{
 #players_cont .player.onquest{
 	box-shadow: 0 0 20px lightgreen;
 }
+#player_cont.hammer .player.isking .isking::after{
+	content: "KING & HAMMER";
+}
 
 #game_end, #assassinate{
 	display: flex; align-items: center; justify-content: center; 

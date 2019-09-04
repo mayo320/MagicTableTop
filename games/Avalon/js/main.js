@@ -125,6 +125,13 @@ function updateUIQuestMap(data){
 	for	(var i = 0; i < rejects.length; i++){
 		if (i < data.num_rejects) $(rejects[i]).addClass("fill");
 		else $(rejects[i]).removeClass("fill");
+		
+		if (data.num_rejects == rejects.length - 1){
+			// Current king gets hammer
+			$("#players_cont").addClass("hammer");
+		} else {
+			$("#players_cont").removeClass("hammer");
+		}
 	}
 }
 
