@@ -146,6 +146,8 @@ function UIUpdateGameStatus(ev, payload){
 				string += "<li><h5>>"+p+"</h5></li>";
 			});
 			$("#game-state #vote ul").html(string);
+			voting_results = {};
+			UIUpdateVotingResult();
 			break;
 		case "QUEST":
 			$("#game-state #onquest").removeClass("hidden");
@@ -222,21 +224,27 @@ function UIUpdatePlayerRole(){
 }
 
 function UIUpdateVotingResult(){
+	var show = false;
+	if (players.length == Object.keys(voting_results).length) show = true;
+	
 	$list = $("#voting_result");
-	$list.html("");
+	$list.html("");	
 	$.each(players, function(i, p){
 		$list.append(voting_result_template);
 		$li = $list.find("li:last");
 		$li.find(".name").html(p.name);
 		$li.removeClass("hidden");
-		if (p.id in voting_results){
+		$r = $li.find(".role");
+		$r.addClass("unknown");
+		if (show && p.id in voting_results){
+			$r.removeClass("unknown");
 			if (voting_results[p.id]){
-				$li.find(".role").removeClass("reject").addClass("accept");
+				$r.removeClass("reject").addClass("accept");
 			}else{
-				$li.find(".role").removeClass("accept").addClass("reject");
+				$r.removeClass("accept").addClass("reject");
 			}
 		}else{
-			$li.addClass("hidden");
+			//$li.addClass("hidden");
 		}
 	});
 }

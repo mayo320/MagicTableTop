@@ -45,13 +45,17 @@ ul{
 #game-state .btn{
 	display: block; min-width: 70%; margin: auto;
 }
-.accept::after{
+.role.accept::after{
 	content: "Accept";
 	color: darkgreen;
 }
-.reject::after{
+.role.reject::after{
 	content: "Reject";
 	color: orange;
+}
+.role.unknown::after{
+	content: "?";
+	color: grey;
 }
 
 #popup{

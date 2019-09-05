@@ -231,6 +231,7 @@ var Game = function(){
 					ev: "VOTE",
 					load: currentQuesting.map((id) => this.players[id].name)
 				});
+				lastVotingResult = {};
 				break;
 			case "PLAYER_VOTE":
 				// payload is bool
@@ -328,7 +329,6 @@ var Game = function(){
 						currQuest += 1;
 						this.notifyKing();
 					}
-					
 					this.emitData();
 				}
 				break;
