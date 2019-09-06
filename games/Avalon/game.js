@@ -28,10 +28,12 @@ var Game = function(){
 	var gameState = GameState.selecting_roles;
 	
 	var currentKing = -1; // id of current king
+	var currentHammer = -1;
 	var currentQuesting = []; // IDs of players who go on questing
 	var currentVoting = []; // IDs of players currently still have yet to vote
 
 	var questDistribution = {
+		4: [-2,-2,2,2,2], // For testing purposes
 		5: [2,3,2,3,3],
 		6: [2,3,3,3,4],
 		7: [2,3,3,-4,4], // -ve means need 2 fails
@@ -299,13 +301,14 @@ var Game = function(){
 					gameState = GameState.king;
 
 					if (failures > 0){
-						if (questNumber[currQuest] < 0 && failures >= 2){
-							questResults[currQuest] = failures;
+						if (questNumber[currQuest] < 0){
+							if (failures >= 2) questResults[currQuest] = failures;
+							else questResults[currQuest] = -failures; // use -ve to indicate success, but x failed
 						}else if(questNumber[currQuest] > 0){
 							questResults[currQuest] = failures;
 						}
 					}else{
-						questResults[currQuest] = -1; // -1 means quest passed
+						questResults[currQuest] = 0; // 0 means 0 failures (pass)
 					}
 
 					// this.sendEventToMain("QUEST_RESULT", {
@@ -366,12 +369,13 @@ var Game = function(){
 			quest_results: questResults,
 			game_state: gameState,
 			current_king: currentKing,
+			current_hammer: currentHammer,
 			players_onquest: currentQuesting,
 			players_voting: currentVoting,
 			last_voting_result: lastVotingResult,
 			roles_count: rolesCount,
 			num_rejects: numRejects,
-			players: Object.keys(this.players).map((k) => {
+			players: this.playerIDs.map((k) => {
 				var temp = copy(this.players[k]);
 				temp.role = undefined;
 				return temp;
@@ -462,7 +466,7 @@ var Game = function(){
 			}else if (p > 8){
 				questNumber = questDistribution[8];
 			}else if (p < 5){
-				questNumber = questDistribution[5];
+				questNumber = questDistribution[4];
 			}
 
 			this.sendEventToAll("GAME_START", 1);
@@ -488,6 +492,7 @@ var Game = function(){
 		var id = this.playerIDs[randInt(0, this.playerIDs.length)];
 		players[id].isKing = true;
 		currentKing = id;
+		this.incrementKing();
 	}
 
 	this.incrementKing = function(){
@@ -499,6 +504,18 @@ var Game = function(){
 				k = k >= this.playerIDs.length ? 0 : k;
 				players[this.playerIDs[k]].isKing = true;
 				currentKing = this.playerIDs[k];
+				break;
+			}
+		}
+		// Find hammer
+		for (var i = 0; i < this.playerIDs.length; i++){
+			if(players[this.playerIDs[i]].isKing){
+				var k = i;
+				for (var j = 0; j < 5 - numRejects; j++){
+					k = k >= this.playerIDs.length ? 0 : k;
+					currentHammer = this.playerIDs[k];
+					k += 1;
+				}
 				break;
 			}
 		}

@@ -44,16 +44,14 @@
 	<div id="game-frame">
 		<div id="quest_map">
 			<div style="position: absolute; left: 1rem; top: 1rem;">
-				<h5> - X/Y, where X = number of failures, and Y = the number of players on quest.
-					<br>
-				- Y* needs two failures</h5>
+				<h5> * means it needs two failures to fail.</h5>
 			</div>
 			<ul id="quests">
-				<li class="quest"><h1>5</h1></li>
-				<li class="quest"><h1>5</h1></li>
-				<li class="quest"><h1>5</h1></li>
-				<li class="quest"><h1>5</h1></li>
-				<li class="quest"><h1>5</h1></li>
+				<li class="quest"><h1>5</h1><span class="failures"></span></li>
+				<li class="quest"><h1>5</h1><span class="failures"></span></li>
+				<li class="quest"><h1>5</h1><span class="failures"></span></li>
+				<li class="quest"><h1>5</h1><span class="failures"></span></li>
+				<li class="quest"><h1>5</h1><span class="failures"></span></li>
 			</ul>
 			<ul id="rejects">
 				<li class="reject"></li>
@@ -72,48 +70,56 @@
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="left: 30%; top:1rem;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="right: 30%; top:1rem;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="right: 1rem; top:1rem;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="right: 1rem; top:0; bottom: 0; margin: auto;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="right: 1rem; bottom:1rem;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="right: 30%; bottom:1rem;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="left: 30%; bottom:1rem;">
 				<h3 class="name">NAME</h3> <hr>
 				<h3 class="isking"></h3>
 				<h4 class="onquest"></h4>
+				<h4 class="ishammer"></h4>
 				<h4 class="voting"></h4>
 			</div>
 			<div class="player" style="left: 1rem; bottom:1rem;">

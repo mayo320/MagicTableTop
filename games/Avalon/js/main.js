@@ -107,31 +107,35 @@ function updateUIQuestMap(data){
 	var quests = $(".quest");
 	for(var i = 0; i < 5; i++){
 		var val = data.all_quests[i];
+		var fails = 0;
 		if (val < 0){
 			val = (-1*val) + "*";
 		}
 
-		if (data.quest_results[i] > 0){
-			$(quests[i]).addClass("fail");
-			val = data.quest_results[i] + "/" + val;
-		}else if(data.quest_results[i] < 0){
-			$(quests[i]).addClass("pass");
+		if (data.current_quest > i){
+			if (data.quest_results[i] > 0){
+				$(quests[i]).addClass("fail");
+				fails = data.quest_results[i];
+			}else if(data.quest_results[i] <= 0){
+				$(quests[i]).addClass("pass");
+				if (data.quest_results[i] < 0){
+					// pass but has failure in it
+					fails = (-data.quest_results[i]);
+				}
+			}
 		}
 
 		$(quests[i]).find("h1").html(val);
+		if (fails == 0)
+			$(quests[i]).find(".failures").html("");
+		else
+			$(quests[i]).find(".failures").html(fails + " fail(s)");
 	}
 	
 	var rejects = $(".reject");
 	for	(var i = 0; i < rejects.length; i++){
 		if (i < data.num_rejects) $(rejects[i]).addClass("fill");
 		else $(rejects[i]).removeClass("fill");
-		
-		if (data.num_rejects == rejects.length - 1){
-			// Current king gets hammer
-			$("#players_cont").addClass("hammer");
-		} else {
-			$("#players_cont").removeClass("hammer");
-		}
 	}
 }
 
@@ -157,6 +161,11 @@ function updateUIPlayerInfo(){
 			$($players[i]).addClass("onquest");
 		}else{
 			$($players[i]).removeClass("onquest");
+		}
+		if (players[i].id == data.current_hammer){
+			$($players[i]).addClass("ishammer");
+		}else{
+			$($players[i]).removeClass("ishammer");
 		}
 	}
 }

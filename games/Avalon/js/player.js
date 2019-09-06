@@ -99,10 +99,13 @@ $(document).ready(function(){
 		$role.find(".num_players").html(players.length);
 		var $ul = $role.find("ul");
 		var html = ""
-		$.each(Object.keys(roles), function(i, r){
+		var role_names = Object.keys(roles);
+		role_names = role_names.sort((x, y)=>roles[x].alignment - roles[y].alignment);
+		$.each(role_names, function(i, r){
 			var role = roles[r];
+			var align = role.alignment == 0 ? "good" : "evil";
 			html += "<li class='list-group-item'>";
-			html += "<h4 class='name'><span class='num'>"+rolesCount[r].count+"</span> | "+r+"</h4>";
+			html += "<h4 class='name "+align+"'><span class='num'>"+rolesCount[r].count+"</span> | "+r+"</h4>";
 			html += "<div class='role'><div onclick='removeRole(this,\""+r+"\")'><h4>-</h4></div>";
 			html += "<div onclick='addRole(this,\""+r+"\")'><h4>+</h4></div></div>";
 			html += "</li>"
@@ -137,7 +140,7 @@ function UIUpdateGameStatus(ev, payload){
 		case "KING":
 			$("#game-state #king").removeClass("hidden");
 			kingSelectableNum = Math.abs(parseInt(payload));
-			$("#game-state #king .num").html(payload);
+			$("#game-state #king .num").html(kingSelectableNum);
 			break;
 		case "VOTE":
 			$("#game-state #vote").removeClass("hidden");
@@ -220,6 +223,8 @@ function UIUpdatePlayerRole(){
 		}
 		$("#player-card #pcard .role").html(player.role);
 		$("#player-card #pcard .description").html(roles[player.role].description);
+		var align = roles[player.role].alignment == 1 ? "(Evil)" : "(Good)";
+		$("#player-card #pcard .align").html(align);
 	}
 }
 

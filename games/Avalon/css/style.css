@@ -54,20 +54,26 @@ hr{
 	width: 50rem; height: 30rem; border: 1px solid white; position: relative;
 }
 #quests{
-	position: absolute; top: 8rem; left: 2rem;
+	position: absolute; top: 8rem; left: 2rem; vertical-align: top;
 }
 #quests .quest{
 	border: 1px solid white; 
 	height: 7rem; width: 7rem; 
 	border-radius: 50%;
 	margin: 1rem;
-	display: inline-block; text-align: center; padding-top: 1.6rem; color: white;
+	display: inline-block; text-align: center; 
+	padding-top: 1.6rem;
+	color: white; position: relative;
 }
 #quests .quest.pass{
 	background: lightgreen; color: black;
 }
 #quests .quest.fail{
 	background: tomato; color: black;
+}
+#quests .quest .failures{
+	position: absolute; bottom: 0.7rem; width: 100%; color: black; left: 0rem;
+	font-weight: bold; font-size: 1rem;
 }
 #rejects{
 	position: absolute; bottom: 2rem; left: 2rem;
@@ -98,6 +104,9 @@ hr{
 #players_cont .player.voting .voting::after{
 	content: "VOTING"; color: tomato;
 }
+#players_cont .player.ishammer .ishammer::after{
+	content: "HAMMER"; color: brown;
+}
 
 #players_cont .player.isking{
 	box-shadow: 0 0 20px orange;
@@ -107,9 +116,6 @@ hr{
 }
 #players_cont .player.onquest{
 	box-shadow: 0 0 20px lightgreen;
-}
-#player_cont.hammer .player.isking .isking::after{
-	content: "KING & HAMMER";
 }
 
 #game_end, #assassinate{

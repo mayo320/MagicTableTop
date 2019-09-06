@@ -22,7 +22,7 @@
 	<script src="/games/Avalon/js/global.js"></script>
 	<script src="/games/Avalon/js/player.js"></script>
 
-	<div class="game-frame hidden" style="margin-bottom:2rem;">
+	<div class="game-frame hidden" style="margin-bottom:5rem;">
 		<div class="card" id="game-state">
 			<div class="card-header">
 				<h3>Game Status</h3>
@@ -87,7 +87,6 @@
 					<h4 class="role accept"></h4>
 				</li>
 			</ul>
-			
 		</div>
 
 		<div class="card" id="player-card">
@@ -96,11 +95,11 @@
 			  	<h3 class="toggle" onclick="hideID('pcard')">Toggle<span class="caret"></span></h3>
 			</div>
 			<div class="hidden" id="pcard">
-			 	<img class="card-img-bottom" src="">
 				<div style="margin: 1rem;">
-					<h4>You are <span class="role">Dummy</span></h4>
-					<p class="description">Did not load properly</p>
+					<h3>You are <span class="role">Dummy</span> <span class="align"></span></h3>
+					<h5 class="description">Did not load properly</h5>
 				</div>
+			 	<img class="card-img-bottom" src="">
 			</div>
 		</div>
 
@@ -115,6 +114,29 @@
 					<h4 class="role">Morgana</h4>
 				</li>
 			</ul>
+		</div>
+
+		<div class="card" id="info-help">
+			<div class="card-header">
+				<h3 class="title">Help</h3>
+			  	<h3 class="toggle" onclick="hideID('pinforoles')">Toggle<span class="caret"></span></h3>
+			</div>
+			<div class="hidden" id="pinforoles" style="margin: 1rem;">
+				<h4 class="sub-header">Goals</h4>
+				<h5>As Good faction: pass 3 quests.</h5>
+				<h5>As Evil faction: fail 3 quests or if reject counter reaches 5.</h5> 
+				<h5>If Good wins, Evil can win if Assassin kills Merlin at the end.</h5> 
+				<br>
+				<h4 class="sub-header">Roles</h4>
+				<ul class="list-group">
+					<li class="list-group-item"><h5>Merlin: Knows all evils except Mordred.</h5></li>
+					<li class="list-group-item"><h5>Percival: Knows 2 Merlins (one is Morgana disguised)</h5></li>
+					<li class="list-group-item"><h5>Assassin: Can choose to assasinate a person at the end of the game. If this person is Merlin, evils win.</h5></li>
+					<li class="list-group-item"><h5>Morgana: Appears as Merlin to Percival.</h5></li>
+					<li class="list-group-item"><h5>Mordred: Unknown to Merlin.</h5></li>
+					<li class="list-group-item"><h5>Obreon: Unknown to evils.</h5></li>
+				</ul>
+			</div>
 		</div>
 
 		<div id="popup" class="hidden">
