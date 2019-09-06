@@ -44,6 +44,7 @@ var Game = function(){
 	var currQuest = 0;
 
 	var lastVotingResult = {};
+	var pastVotes = [];
 	var numRejects = 0;
 
 	var initialized = false;
@@ -253,6 +254,9 @@ var Game = function(){
 					}
 				});
 				if (allvote){
+					if (currQuest >= pastVotes.length) pastVotes.push([]);
+					pastVotes[currQuest].push(lastVotingResult);
+
 					if (voteresult <= 0){
 						// voting did not pass
 						numRejects += 1;
@@ -373,6 +377,7 @@ var Game = function(){
 			players_onquest: currentQuesting,
 			players_voting: currentVoting,
 			last_voting_result: lastVotingResult,
+			past_votes: pastVotes,
 			roles_count: rolesCount,
 			num_rejects: numRejects,
 			players: this.playerIDs.map((k) => {

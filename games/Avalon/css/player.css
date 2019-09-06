@@ -77,7 +77,14 @@ ul{
 	color: white;
 }
 
-#info-help .sub-header{
+#pvotes .table .accept::after{
+	content:"A"; color: darkgreen; font-weight: bold;
+}
+#pvotes .table .reject::after{
+	content:"R"; color: orange; font-weight: bold;
+}
+
+.sub-header{
 	background: lightgrey; padding: 0.5rem 1rem; border-radius:0.4rem;
 }
 

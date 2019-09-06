@@ -30,6 +30,7 @@ var king_players_template = "";
 var ass_players_template = "";
 var other_players_template = "";
 var voting_result_template = "";
+var past_vote_template = "";
 var socket;
 $(document).ready(function(){
 	socket = new MTSocket("player");
@@ -54,6 +55,7 @@ $(document).ready(function(){
 	socket.onReceiveEvent("EMIT", function(payload){
 		console.log(payload);
 		voting_results = payload.last_voting_result;
+		past_votes = payload.past_votes;
 		UIUpdateVotingResult();
 		if (payload.game_state == GameState.end && isHost){
 			sendGameStatus("END",0);
@@ -252,6 +254,42 @@ function UIUpdateVotingResult(){
 			//$li.addClass("hidden");
 		}
 	});
+	UIUpdatePastVotes();
+}
+
+function UIUpdatePastVotes(){
+	if (past_vote_template == "") {
+		past_vote_template = $("#pvotes li.template").parent().html();
+		$("#pvotes li.template").parent().html("");
+	}
+
+	$list = $("ul#pvotes");
+	$list.html("");
+
+	for (var i = 0; i < past_votes.length; i++) {
+		$list.append(past_vote_template);
+		var $li = $list.find("li:last");
+		$li.find(".sub-header").html("Quest " + (i+1));
+		UIUpdatePastVotesTable($li.find(".table"), past_votes[i]);
+	}
+}
+function UIUpdatePastVotesTable($table, iterations){
+	$table.html("");
+	var s = "";
+	s += "<tr><th>Iter</th>";
+	for (var i = 0; i < players.length; i++){
+		s += "<th>" + players[i].name + "</th>";
+	}
+	s += "/<tr>";
+	for (var i = 0; i < iterations.length; i++){
+		s += "<tr><td>" + (i+1) + "</td>";
+		for (var j = 0; j < players.length; j++){
+			var c = iterations[i][players[j].id] ? "accept" : "reject";
+			s += "<td class='" + c + "'></td>";
+		}
+		s += "/<tr>";
+	}
+	$table.html(s);
 }
 
 function randInt(l, h){
