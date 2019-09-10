@@ -89,6 +89,29 @@
 			</ul>
 		</div>
 
+		<div class="card" id="past-votes">
+			<div class="card-header">
+				<h3 class="title">Past Votes</h3>
+			  	<h3 class="toggle" onclick="hideID('pvotes')">Toggle<span class="caret"></span></h3>
+			</div>
+			<ul class="list-group hidden" id='pvotes'>
+				<li class="list-group-item template">
+					<h4 class="sub-header">Quest 1</h4>
+					<table class="table">
+						<tr>
+							<th>Iter</th><th>Jack</th><th>Friend</th>
+						</tr>
+						<tr>
+							<td>1</td><td class="accept"></td><td class="reject"></td>
+						</tr>
+						<tr>
+							<td>2</td><td class="accept"></td><td class="accept"></td>
+						</tr>
+					</table>
+				</li>
+			</ul>
+		</div>
+
 		<div class="card" id="player-card">
 		  	<div class="card-header">
 			  	<h3 class="title">Your Role</h3>
@@ -116,29 +139,6 @@
 			</ul>
 		</div>
 
-		<div class="card">
-			<div class="card-header">
-				<h3 class="title">Past Votes</h3>
-			  	<h3 class="toggle" onclick="hideID('pvotes')">Toggle<span class="caret"></span></h3>
-			</div>
-			<ul class="list-group hidden" id='pvotes'>
-				<li class="list-group-item template">
-					<h4 class="sub-header">Quest 1</h4>
-					<table class="table">
-						<tr>
-							<th>Iter</th><th>Jack</th><th>Friend</th>
-						</tr>
-						<tr>
-							<td>1</td><td class="accept"></td><td class="reject"></td>
-						</tr>
-						<tr>
-							<td>2</td><td class="accept"></td><td class="accept"></td>
-						</tr>
-					</table>
-				</li>
-			</ul>
-		</div>
-
 		<div class="card" id="info-help">
 			<div class="card-header">
 				<h3 class="title">Help</h3>
@@ -154,6 +154,7 @@
 				<ul class="list-group">
 					<li class="list-group-item"><h5>Merlin: Knows all evils except Mordred.</h5></li>
 					<li class="list-group-item"><h5>Percival: Knows 2 Merlins (one is Morgana disguised)</h5></li>
+					<li class="list-group-item"><h5>Arthur: Knows Percival.</h5></li>
 					<li class="list-group-item"><h5>Assassin: Can choose to assasinate a person at the end of the game. If this person is Merlin, evils win.</h5></li>
 					<li class="list-group-item"><h5>Morgana: Appears as Merlin to Percival.</h5></li>
 					<li class="list-group-item"><h5>Mordred: Unknown to Merlin.</h5></li>
@@ -180,7 +181,7 @@
 
 	</div>
 
-	<div id="role_selection" class="hidden">
+	<div id="role_selection" class="hidden" style="padding-bottom: 4rem;">
 		<div class="card">
 			<div class="card-header">
 				<h3>Hi Host. <br>There are <span class="num_players">X</span> players, please select the distribution of roles.</h3>
@@ -197,10 +198,24 @@
 			<button class="btn btn-success" style="margin:1rem;" onclick="sendRoles()">
 				<h4>Confirm</h4></button>
 		</div>
+		<div class="card">
+			<div class="card-header">
+				<h3>Settings</h3>
+			</div>
+			<ul class="list-group" id="settings">
+				<li class="list-group-item">
+					<h4 class="text">Show Past Votes?</h4>
+					<label class="switch" style="float:right;">
+						<input type="checkbox" onchange="changeSettings(this, 'showPastVotes')">
+						<span class="slider round"></span>
+					</label>
+				</li>
+			</ul>
+		</div>
 	</div>
 
 	<div id="request_emit">
-		<button class="btn btn-default" onclick="sendRequestEmit()">Refresh Main</button>
+		<button class="btn btn-default" style="background: white;" onclick="sendRequestEmit()">Refresh Main</button>
 	</div>
 	
 </body>

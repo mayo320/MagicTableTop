@@ -40,7 +40,7 @@ var Game = function(){
 		8: [3,4,4,-5,5], // this is for 8+
 	}
 	var questNumber = [2,3,2,3,3] // how many players required for each quest
-	var questResults = [0,0,0,0,0] // 1 indicates failure
+	var questResults = [0,0,0,0,0] // negative means success, positive is failure. (the abs value is number of fails)
 	var currQuest = 0;
 
 	var lastVotingResult = {};
@@ -48,6 +48,9 @@ var Game = function(){
 	var numRejects = 0;
 
 	var initialized = false;
+	var gameSettings = {
+		showPastVotes: false
+	};
 
 	// a player should pick available roles in the start
 	var roleAssassin = "Assassin";
@@ -63,6 +66,10 @@ var Game = function(){
 			min: 1, max: 1
 		},
 		Percival: {
+			count: 0, alignment: 0,
+			min: 0, max: 1
+		},
+		Arthur: {
 			count: 0, alignment: 0,
 			min: 0, max: 1
 		},
@@ -223,6 +230,9 @@ var Game = function(){
 						break;
 				}
 				break;
+			case "PLAYER_SETTINGS":
+				gameSettings = payload;
+				break;
 			case "PLAYER_KING_SELECT":
 				// payload is a list of IDs
 				// king selected a list of players
@@ -262,7 +272,7 @@ var Game = function(){
 						numRejects += 1;
 						if (numRejects >= 5){
 							// evils win when number of rejects pass 5
-							this.sendEventToMain("GAME_END", {winner:1});
+							this.sendEventToMain("GAME_END", {winner:1, msg:"There are 5 rejected votes."});
 							gameState = GameState.end;
 						}else{
 							this.incrementKing();
@@ -320,11 +330,12 @@ var Game = function(){
 					// 	quest_failed: questResults[currQuest] > 0
 					// });
 
+					currQuest += 1;
 					if (questResults.reduce((acc, x)=>acc + (x > 0 ? 1 : 0), 0) > 2){
 						// evils win
-						this.sendEventToMain("GAME_END", {winner:1});
+						this.sendEventToMain("GAME_END", {winner:1, msg:"There are 3 failed quests."});
 						gameState = GameState.end;
-					}else if(questResults.reduce((acc, x)=>acc + (x < 0 ? 1 : 0), 0) > 2){
+					}else if(questResults.slice(0, currQuest).reduce((acc, x)=>acc + (x <= 0 ? 1 : 0), 0) > 2){
 						// good wins. Assassin can choose to assassinate a person TODO
 						gameState = GameState.assassinate;
 						this.sendEventToMain("ASSASSINATE", {});						
@@ -333,7 +344,6 @@ var Game = function(){
 							load: 1
 						});
 					}else{
-						currQuest += 1;
 						this.notifyKing();
 					}
 					this.emitData();
@@ -341,14 +351,16 @@ var Game = function(){
 				break;
 			case "PLAYER_ASSASSINATE":
 				// payload is the ID of the target
-				if (this.players[playerID].role == roleAssassin){
-					if (this.players[parseInt(payload)].role == roleMerlin){
+				var assassin = this.players[playerID];
+				var target = this.players[parseInt(payload)];
+				if (assassin.role == roleAssassin){
+					if (target.role == roleMerlin){
 						// evils win
-						this.sendEventToMain("GAME_END", {winner:1});
+						this.sendEventToMain("GAME_END", {winner:1, msg:"Assassin("+assassin.name+") killed Merlin("+target.name+")!"});
 						gameState = GameState.end;
 					} else {
 						// goods win
-						this.sendEventToMain("GAME_END", {winner:0});
+						this.sendEventToMain("GAME_END", {winner:0, msg:"Assassin("+assassin.name+") failed to kill Merlin thanks to "+target.role+"'s sacrifice ("+target.name+")."});
 						gameState = GameState.end;						
 					}
 				}
@@ -380,6 +392,7 @@ var Game = function(){
 			past_votes: pastVotes,
 			roles_count: rolesCount,
 			num_rejects: numRejects,
+			game_settings: gameSettings,
 			players: this.playerIDs.map((k) => {
 				var temp = copy(this.players[k]);
 				temp.role = undefined;
@@ -424,6 +437,9 @@ var Game = function(){
 			case "Percival":
 				knows["Merlin"] = "Merlin";
 				knows["Morgana"] = "Merlin";
+				break;
+			case "Arthur":
+				knows["Percival"] = "Percival";
 				break;
 			case "Oberon":
 			case "Servant":

@@ -19,6 +19,7 @@ $(document).ready(function(){
 		console.log("GAME END, WINNER IS THE " + (payload.winner == 1 ? "EVIL" : "GOOD") + " FACTION");
 		$("#assassinate").addClass("hidden");
 		$("#game_end").removeClass("hidden").find(".faction").html(payload.winner == 1 ? "EVIL" : "GOOD");
+		$("#game_end").find(".message").html(payload.msg);
 	});
 	socket.onReceiveEvent("ASSASSINATE", function(payload){
 		console.log("Assassination");
@@ -31,6 +32,9 @@ $(document).ready(function(){
 		updateUIMessageInfo(data);
 		players = data.players;
 		updateUIPlayerInfo();
+		if (data.game_state == GameState.assassinate){
+			$("#assassinate").removeClass("hidden");
+		}
 	});
 	socket.onReceiveEvent("GAME_START", function(payload){
 		socket.sendEvent("EMIT", 1);

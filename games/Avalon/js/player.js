@@ -1,4 +1,4 @@
-
+var game_settings = {};
 var players = [
 	{
 		name: "Jack", id:0, role: "Servant"
@@ -56,6 +56,7 @@ $(document).ready(function(){
 		console.log(payload);
 		voting_results = payload.last_voting_result;
 		past_votes = payload.past_votes;
+		game_settings = payload.game_settings;
 		UIUpdateVotingResult();
 		if (payload.game_state == GameState.end && isHost){
 			sendGameStatus("END",0);
@@ -99,7 +100,7 @@ $(document).ready(function(){
 		var $role = $("#role_selection");
 		$role.removeClass("hidden");
 		$role.find(".num_players").html(players.length);
-		var $ul = $role.find("ul");
+		var $ul = $role.find("#available_roles");
 		var html = ""
 		var role_names = Object.keys(roles);
 		role_names = role_names.sort((x, y)=>roles[x].alignment - roles[y].alignment);
@@ -254,7 +255,12 @@ function UIUpdateVotingResult(){
 			//$li.addClass("hidden");
 		}
 	});
-	UIUpdatePastVotes();
+
+	if (game_settings.showPastVotes)
+		UIUpdatePastVotes();
+	else{
+		$("#past-votes").addClass("hidden");
+	}
 }
 
 function UIUpdatePastVotes(){
@@ -276,15 +282,15 @@ function UIUpdatePastVotes(){
 function UIUpdatePastVotesTable($table, iterations){
 	$table.html("");
 	var s = "";
-	s += "<tr><th>Iter</th>";
-	for (var i = 0; i < players.length; i++){
-		s += "<th>" + players[i].name + "</th>";
+	s += "<tr><th></th>";
+	for (var i = 0; i < iterations.length; i++){
+		s += "<th>" + (i+1) + "</th>";
 	}
 	s += "/<tr>";
-	for (var i = 0; i < iterations.length; i++){
-		s += "<tr><td>" + (i+1) + "</td>";
-		for (var j = 0; j < players.length; j++){
-			var c = iterations[i][players[j].id] ? "accept" : "reject";
+	for (var i = 0; i < players.length; i++){
+		s += "<tr><td>" + players[i].name + "</td>";
+		for (var j = 0; j < iterations.length; j++){
+			var c = iterations[j][players[i].id] ? "accept" : "reject";
 			s += "<td class='" + c + "'></td>";
 		}
 		s += "/<tr>";
@@ -470,4 +476,8 @@ function removeRole(obj, role){
 	}
 }
 
-
+function changeSettings(obj, key){
+	game_settings[key] = obj.checked;
+	console.log(game_settings);
+	socket.sendEvent("PLAYER_SETTINGS", game_settings);
+}

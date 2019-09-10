@@ -22,6 +22,11 @@ var roles = {
 		description: "You know the Merlins (one of them is Morgana)",
 		img: "http://i.imgur.com/nCNxgKJ.png",
 	},
+	Arthur: {
+		alignment: 0,
+		description: "You know Percival.",
+		img: "http://images.squarespace-cdn.com/content/v1/516c7a5fe4b0bb1f91d241ef/1508872564554-A6S2LSZWCG2MEZ3PGFUD/ke17ZwdGBToddI8pDm48kGhojBX82zCP3Ae48lCqYtoUqsxRUqqbr1mOJYKfIPR7LoDQ9mXPOjoJoqy81S2I8PaoYXhp6HxIwZIk7-Mi3Tsic-L2IOPH3Dwrhl-Ne3Z2yCekuzU5HbAa0m2-ES5X3iR2lNYc3DIrB2nJuJA_iXYKMshLAGzx4R3EDFOm1kBS/Screen+Shot+2017-10-24+at+12.14.53+PM.png",
+	},
 	Morgana: {
 		alignment: 1,
 		description: "You appear as Merlin, confusing Percival.",

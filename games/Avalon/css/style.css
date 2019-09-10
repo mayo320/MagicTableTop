@@ -17,7 +17,7 @@ hr{
 	display: none !important;
 }
 
-#game-frame, #selecting_roles, #game_end{
+#game-frame, #selecting_roles, #game_end, #assassinate{
 	position: absolute; top: 0; left: 0; height: 100%; width: 100%;
 }
 #selecting_roles h2{
@@ -120,5 +120,5 @@ hr{
 
 #game_end, #assassinate{
 	display: flex; align-items: center; justify-content: center; 
-	background: rgba(0,0,0,0.7);
+	background: rgba(0,0,0,0.8);
 }
