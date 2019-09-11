@@ -161,6 +161,11 @@ function updateUIPlayerInfo(){
 		}else{
 			$($players[i]).removeClass("voting");
 		}
+		if (data.game_state == GameState.vote && data.players_nominated.indexOf(players[i].id) >= 0){
+			$($players[i]).addClass("nominated");
+		}else{
+			$($players[i]).removeClass("nominated");
+		}
 		if (data.game_state == GameState.quest && data.players_onquest.indexOf(players[i].id) >= 0){
 			$($players[i]).addClass("onquest");
 		}else{

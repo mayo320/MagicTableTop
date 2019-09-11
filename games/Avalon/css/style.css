@@ -95,17 +95,30 @@ hr{
 	position: fixed; border: 1px solid lightgrey; border-radius: 1rem;
 	width: 10rem; height: 10rem; text-align: center;
 }
-#players_cont .player.onquest .onquest::after{
-	content: "ON QUEST"; color: lightgreen;
+#players_cont .player div{
+	background-repeat: no-repeat; background-size: cover;
+  	height: 2.5rem; width: 2.5rem; display: none;
+} 
+
+#players_cont .player.onquest .onquest{
+	/*content: "ON QUEST"; color: lightgreen;*/
+	background-image: url("../img/quest.png"); display: inline-block;
 }
-#players_cont .player.isking .isking::after{
-	content: "KING"; color: orange;
+#players_cont .player.isking .isking{
+	/*content: "KING"; color: orange;*/
+	background-image: url("../img/king.png"); display: inline-block;
 }
-#players_cont .player.voting .voting::after{
-	content: "VOTING"; color: tomato;
+#players_cont .player.voting .voting{
+	/*content: "VOTING"; color: tomato;*/
+	background-image: url("../img/vote.png"); display: inline-block;
 }
-#players_cont .player.ishammer .ishammer::after{
-	content: "HAMMER"; color: brown;
+#players_cont .player.ishammer .ishammer{
+	/*content: "HAMMER"; color: brown;*/
+	background-image: url("../img/hammer.png"); display: inline-block;
+}
+#players_cont .player.nominated .nominated{
+	/*content: "NOMINATED"; color: lightgreen;*/
+	background-image: url("../img/nominate.png"); display: inline-block;
 }
 
 #players_cont .player.isking{
@@ -113,6 +126,9 @@ hr{
 }
 #players_cont .player.voting{
 	box-shadow: 0 0 20px tomato;
+}
+#players_cont .player.nominated{
+	box-shadow: 0 0 20px lightgreen;
 }
 #players_cont .player.onquest{
 	box-shadow: 0 0 20px lightgreen;

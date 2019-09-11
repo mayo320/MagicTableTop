@@ -29,6 +29,7 @@ var Game = function(){
 	
 	var currentKing = -1; // id of current king
 	var currentHammer = -1;
+	var currentNominated = []; // IDs of players nomiated to go on quest
 	var currentQuesting = []; // IDs of players who go on questing
 	var currentVoting = []; // IDs of players currently still have yet to vote
 
@@ -237,6 +238,7 @@ var Game = function(){
 				// payload is a list of IDs
 				// king selected a list of players
 				currentQuesting = payload.map((id) => parseInt(id));
+				currentNominated = currentQuesting;
 				currentVoting = Object.keys(this.players).map((id) => parseInt(id));
 				gameState = GameState.vote;
 				this.loopPlayers((id, p) => {p.vote = undefined;});		
@@ -387,6 +389,7 @@ var Game = function(){
 			current_king: currentKing,
 			current_hammer: currentHammer,
 			players_onquest: currentQuesting,
+			players_nominated: currentNominated,
 			players_voting: currentVoting,
 			last_voting_result: lastVotingResult,
 			past_votes: pastVotes,
