@@ -19,15 +19,17 @@ var Game = function(){
 	this.playerIDs = [];
 	var GameState = {
 		selecting_roles: -1,
-		king: 0,
-		vote: 1,
-		quest: 2,
-		assassinate: 3,
-		end: 4
+		lady: 0,
+		king: 1,
+		vote: 2,
+		quest: 3,
+		assassinate: 4,
+		end: 5
 	}
 	var gameState = GameState.selecting_roles;
 	
 	var currentKing = -1; // id of current king
+	var currentLady = -1; // id of current lady
 	var currentHammer = -1;
 	var currentNominated = []; // IDs of players nomiated to go on quest
 	var currentQuesting = []; // IDs of players who go on questing
@@ -47,6 +49,7 @@ var Game = function(){
 	var lastVotingResult = {};
 	var pastVotes = [];
 	var numRejects = 0;
+	var ladyMap = {}; // <int, int> pair: <lady, selected>
 
 	var initialized = false;
 	var gameSettings = {
@@ -167,6 +170,9 @@ var Game = function(){
 			if (gameState == GameState.king && playerID == currentKing){
 				this.notifyKing();
 			}
+			if (gameState == GameState.lady && playerID == currentLady){
+				this.notifyLady();
+			}
 			else if (gameState == GameState.vote && typeof this.players[playerID].vote == "undefined"){
 				this.sendEventToPlayers([playerID], "GAME_STATE", {
 					ev: "VOTE",
@@ -247,6 +253,18 @@ var Game = function(){
 					load: currentQuesting.map((id) => this.players[id].name)
 				});
 				lastVotingResult = {};
+				break;
+			case "PLAYER_LADY_SELECT":
+				// lady selects a player they want to see
+				// payload is id of player lady wants to see
+				if (playerID == currentLady && gameState == GameState.lady){
+					ladyMap[playerID] = payload;
+					currentLady = payload;
+					gameState = GameState.king;
+					this.emitPlayerData(playerID);
+					this.emitData();
+					this.notifyKing();
+				}
 				break;
 			case "PLAYER_VOTE":
 				// payload is bool
@@ -346,7 +364,13 @@ var Game = function(){
 							load: 1
 						});
 					}else{
-						this.notifyKing();
+						if (currentLady >= 0 && currQuest > 1){
+							gameState = GameState.lady;
+							this.notifyLady();
+						}
+						else{
+							this.notifyKing();
+						}
 					}
 					this.emitData();
 				}
@@ -387,6 +411,7 @@ var Game = function(){
 			quest_results: questResults,
 			game_state: gameState,
 			current_king: currentKing,
+			current_lady: currentLady,
 			current_hammer: currentHammer,
 			players_onquest: currentQuesting,
 			players_nominated: currentNominated,
@@ -452,12 +477,19 @@ var Game = function(){
 
 		var players = Object.keys(this.players).map((k) => {
 			var temp = copy(this.players[k]);
-			if (k != playerID){
+			if (temp.id != playerID){
+				var new_role = "";
 				if (temp.role in knows){
-					temp.role = knows[temp.role];
+					new_role = knows[temp.role];
 				}else{
-					temp.role = "";
+					new_role = "";
 				}
+
+				if (currentLady >= 0 && playerID in ladyMap && ladyMap[playerID] == temp.id && new_role == ""){
+					// playing with lady
+					new_role = rolesCount[temp.role].alignment == 1 ? "L:Evil" : "L:Good";
+				} 
+				temp.role = new_role;
 			}
 			return temp;
 		})
@@ -513,10 +545,16 @@ var Game = function(){
 	}
 	this.initializeKing = function(){
 		var players = this.players;
-		var id = this.playerIDs[randInt(0, this.playerIDs.length)];
+		var chosen_index = randInt(0, this.playerIDs.length);
+		var id = this.playerIDs[chosen_index];
 		players[id].isKing = true;
 		currentKing = id;
 		this.incrementKing();
+		if (gameSettings.LadyOfTheLake){
+			var lady_index = chosen_index;
+			lady_index = lady_index < 0 ? this.playerIDs.length-1 : lady_index;
+			currentLady = this.playerIDs[lady_index];
+		}
 	}
 
 	this.incrementKing = function(){
@@ -551,7 +589,12 @@ var Game = function(){
 			load: questNumber[currQuest]
 		});
 	}
-
+	this.notifyLady = function(){
+		this.sendEventToPlayers([currentLady], "GAME_STATE", {
+			ev: "LADY",
+			load: 1
+		});
+	}
 
 }
 

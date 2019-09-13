@@ -42,6 +42,18 @@
 					<hr>
 					<button class="btn btn-default" disabled onclick="sendGameStatus('KING')"><h4>SELECT</h4></button>
 				</div>
+				<div id="lady" class="item">
+					<h3>You are Lady Of The Lake!</h3>
+					<h4>Choose a player to see their loyalty. Note this player will become Lady Of The Lake next.</h4>
+					<hr>
+					<div class="container">
+						<div class="row">
+							<div class="player col-6 template" onclick="selectPlayerLoyalty(this)">
+								<h3>Jack</h3>
+							</div>
+						</div>
+					</div>
+				</div>
 				<div id="vote" class="hidden item">
 					<h4>These players will go on the quest</h4>
 					<ul>
@@ -207,6 +219,13 @@
 					<h4 class="text">Show Past Votes?</h4>
 					<label class="switch" style="float:right;">
 						<input type="checkbox" onchange="changeSettings(this, 'showPastVotes')">
+						<span class="slider round"></span>
+					</label>
+				</li>
+				<li class="list-group-item">
+					<h4 class="text">Lady Of The Lake</h4>
+					<label class="switch" style="float:right;">
+						<input type="checkbox" onchange="changeSettings(this, 'LadyOfTheLake')">
 						<span class="slider round"></span>
 					</label>
 				</li>

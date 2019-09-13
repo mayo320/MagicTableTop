@@ -71,6 +71,7 @@ function updateUIRolesSelection(){
 	}
 	$("#good ul").html("");
 	$("#evil ul").html("");
+	$("#good ul").addClass("num-"+distribution[0])
 	for (var i = 0; i < distribution[0]; i++){
 		$("#good ul").append(roletemplate);
 	}
@@ -155,6 +156,11 @@ function updateUIPlayerInfo(){
 			$($players[i]).addClass("isking");
 		}else{
 			$($players[i]).removeClass("isking");
+		}
+		if (players[i].id == data.current_lady){
+			$($players[i]).addClass("islady");
+		}else{
+			$($players[i]).removeClass("islady");
 		}
 		if (data.game_state == GameState.vote && data.players_voting.indexOf(players[i].id) >= 0){
 			$($players[i]).addClass("voting");

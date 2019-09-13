@@ -27,6 +27,7 @@ var kingSelectedPlayers = []; // list of indices
 var kingSelectableNum = 0;
 var assassinSelectedPlayers = -1; // the index of target
 var king_players_template = "";
+var lady_players_template = "";
 var ass_players_template = "";
 var other_players_template = "";
 var voting_result_template = "";
@@ -50,6 +51,7 @@ $(document).ready(function(){
 		UIUpdatePlayerRole();
 		
 		UIUpdateKingPlayers();
+		UIUpdateLadyPlayers();
 		UIUpdateAssassinPlayers();
 	});
 	socket.onReceiveEvent("EMIT", function(payload){
@@ -81,20 +83,18 @@ $(document).ready(function(){
 	
 	king_players_template = $("#king .player.template").parent().html();
 	$("#king .player.template").parent().html("");
-	// UIUpdateKingPlayers();
 	
+	lady_players_template = $("#lady .player.template").parent().html();
+	$("#lady .player.template").parent().html("");
+
 	ass_players_template = $("#assassinate .player.template").parent().html();
 	$("#assassinate .player.template").parent().html("");
 
 	other_players_template = $("#other-players #pallies").html();
 	$("#other-players #pallies").html("");
-	// UIUpdateOtherPlayers();
-
-	// UIUpdatePlayerRole();
 
 	voting_result_template = $("#voting_result").html();
 	$("#voting_result").html("");
-	// UIUpdateVotingResult();
 
 	if (isHost && initializingState == GameState.selecting_roles){
 		var $role = $("#role_selection");
@@ -145,6 +145,9 @@ function UIUpdateGameStatus(ev, payload){
 			kingSelectableNum = Math.abs(parseInt(payload));
 			$("#game-state #king .num").html(kingSelectableNum);
 			break;
+		case "LADY":
+			$("#game-state #lady").removeClass("hidden");
+			break;
 		case "VOTE":
 			$("#game-state #vote").removeClass("hidden");
 			var string = ""
@@ -179,6 +182,20 @@ function UIUpdateKingPlayers(){
 		$player.attr("p-name", player.name)
 		$player.attr("p-id", player.id)
 		$player.find("h3").html(player.name);
+	});
+}
+
+function UIUpdateLadyPlayers(){
+	var $list = $("#lady .row");
+	$list.html("");
+	$.each(players, function(i, p){
+		if (p.id != player.id){
+			$list.append(lady_players_template);
+			var $player = $list.find(".player:last");
+			$player.attr("p-name", p.name)
+			$player.attr("p-id", p.id)
+			$player.find("h3").html(p.name);
+		}
 	});
 }
 
@@ -330,6 +347,10 @@ function selectPlayer(obj){
 		$("#king .btn").attr("disabled", true);
 	}
 }
+function selectPlayerLoyalty(obj){
+	var p_id = $(obj).attr("p-id");
+	sendGameStatus("LADY", parseInt(p_id));
+}
 
 function selectTarget(obj){
 	var p_id = $(obj).attr("p-id");
@@ -358,6 +379,16 @@ function sendGameStatus(ev, load){
 			}
 			$popup.find(".body").html(body);
 			$popup.find(".yes").attr("onclick", "sendSelectedPlayers()");
+			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
+			break;
+		case "LADY":
+			$popup.find(".header").html("Lady");
+			var p;
+			for (var i = 0; i < players.length; i++) {
+				if (players[i].id == load) p = players[i];
+			}
+			$popup.find(".body").html("You want to see " + p.name + "'s loyalty? Result will show up in <b>Other Roles</b>");
+			$popup.find(".yes").attr("onclick", "revealPlayerLoyalty("+load+")");
 			$popup.find(".no").attr("onclick", '{$("#popup").addClass("hidden");}');
 			break;
 		case "VOTE":
@@ -402,6 +433,11 @@ function sendSelectedPlayers(){
 	// king selected players.
 	$("#popup").addClass("hidden");
 	socket.sendEvent("PLAYER_KING_SELECT", kingSelectedPlayers);
+	UIUpdateGameStatus();
+}
+function revealPlayerLoyalty(selectedID){
+	$("#popup").addClass("hidden");
+	socket.sendEvent("PLAYER_LADY_SELECT", selectedID);
 	UIUpdateGameStatus();
 }
 function sendVote(vote){

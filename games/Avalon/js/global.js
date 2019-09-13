@@ -1,10 +1,11 @@
 var GameState = {
 	selecting_roles: -1,
-	king: 0,
-	vote: 1,
-	quest: 2,
-	assassinate: 3,
-	end: 4
+	lady: 0,
+	king: 1,
+	vote: 2,
+	quest: 3,
+	assassinate: 4,
+	end: 5
 }
 var roles = {
 	Merlin: {
