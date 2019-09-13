@@ -36,11 +36,13 @@
 
 			function avc(){
 				var v = joined ? $("#joined-page .playername").val() : $("#joining-page .playername").val();
+				v = v.replace(/<\/?[^>]+(>|$)/g, ""); // strip HTML tags
+				
 				if (v.length < 1){
 					alert("Your name is too short!");
 					return;
 				}
-				if (v.length > 10){
+				if (v.length > 15){
 					alert("Your name is too LONG! (max 10 characters)");
 					return;
 				}
