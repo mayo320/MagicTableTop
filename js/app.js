@@ -42,8 +42,7 @@ var App = function(){
 	 	for(var i in config.games){
 	 		var gameConfig = config.games[i];
 	 		if (!gameConfig.disabled){
-			 	var gameObjectPath = path.resolve(global.root_path + "/games/" + gameConfig.name + "/game.js");
-		 		var game = new Game(gameObjectPath, session);
+		 		var game = new Game(gameConfig.name, session);
 
 		 		if (typeof game != "undefined"){
 		 			games.push(game);
@@ -123,7 +122,7 @@ var App = function(){
 	var startGame = function(gameName){
 		var game = null;
 		for(var i in games){
-			if (games[i].name == gameName){
+			if (games[i].folder_name == gameName){
 				game = games[i];
 			}
 		}
@@ -137,6 +136,7 @@ var App = function(){
 			game.startGame();
 			return true;
 		}else{
+			console.log("Cannot find game " + gameName);
 			return false;
 		}
 	}

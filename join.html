@@ -89,7 +89,7 @@
 			var $ul = $("#gamelist ul");
 			for(var i in games){
 				var g = games[i];
-				var li = "<li onclick='playGame(\""+g.name+"\")'>";
+				var li = "<li onclick='playGame(\""+g.folder_name+"\")'>";
 				li += "<h4>" + g.name + "</h4>";
 				li += "</li>";
 				$ul.append(li);

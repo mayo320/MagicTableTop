@@ -4,11 +4,15 @@ var path = require("path");
 var fs = require("fs");
 var express = require("express");
 
-var Game = function(gameObjectPath, session){
+var Game = function(gameFolderName, session){
+ 	var gameRootPath = path.resolve(global.root_path + "/games/" + gameFolderName);
+	var gameObjectPath = path.resolve(gameRootPath + "/game.js");
 	var gameObject = require(gameObjectPath);
+
 	this.gameObject = new gameObject();
+	this.folder_name = gameFolderName;
 	this.name = this.gameObject.name;
-	this.home_path = path.resolve(global.root_path + "/games/" + this.name);
+	this.home_path = gameRootPath;
 	this.player_count = this.gameObject.player_count;
 	this.playtime = this.gameObject.playtime;
 	this.cover_img = this.gameObject.cover_img ? this.gameObject.cover_img : "";
@@ -35,7 +39,7 @@ var Game = function(gameObjectPath, session){
 		this.mainIO.clients((err, clients) => {
 			// Join main client to this game room
 			for (var i in clients){
-				this.mainIO.connected[clients[i]].join(this.name);
+				this.mainIO.connected[clients[i]].join(this.folder_name);
 			}
 		});
 
@@ -60,33 +64,33 @@ var Game = function(gameObjectPath, session){
 
 		this.mainIO.clients((err, clients) => {
 			for (var i in clients){
-				this.mainIO.connected[clients[i]].leave(this.name);
+				this.mainIO.connected[clients[i]].leave(this.folder_name);
 			}
 		});
 		// delete this.gameObject;
 	}
 	this.playerJoin = function(player){
-		player.socket.join(this.name);
+		player.socket.join(this.folder_name);
 	}
 	this.playerLeave = function(player){
-		player.socket.leave(this.name);
+		player.socket.leave(this.folder_name);
 	}
 
 	this.setupHTML = function(app){
-		var relPath = "/games/"+this.name;
+		var relPath = "/games/"+this.folder_name;
 		app.use(relPath, express.static(this.home_path));
 		for (var i in this.gameObject.mappableFolders){
 			var n = this.gameObject.mappableFolders[i];
 			app.use(relPath + "/" + n, express.static(this.home_path + "/" + n));
 		}
 
-		app.get("/main/" + this.name, (req, res) => {
+		app.get("/main/" + this.folder_name, (req, res) => {
 			var html = fs.readFileSync(this.mainHTML, {encoding: "utf8"});
 			html = this.gameObject.initMainHTML(html);
 			res.send(html);
 		});
 
-		app.get("/" + this.name, (req, res) => {
+		app.get("/" + this.folder_name, (req, res) => {
 			var html = fs.readFileSync(this.playerHTML, {encoding: "utf8"});
 			var p = this.session.findPlayerByIp(req.ip);
 
@@ -102,14 +106,14 @@ var Game = function(gameObjectPath, session){
 		this.playersIO = io.of("/player");
 		this.mainIO = io.of("/main");
 
-		this.mainIO.in(this.name).on("connection", (socket) => {
+		this.mainIO.in(this.folder_name).on("connection", (socket) => {
 			socket.use((packet, next) => {
 				this.gameObject.onReceiveEventFromMain(packet[0], packet[1]);
 				next();
 			})
 		});
 
-		this.playersIO.in(this.name).on("connection", (socket) => {
+		this.playersIO.in(this.folder_name).on("connection", (socket) => {
 			var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 			if (p != null){
 				this.gameObject.onPlayerConnect(p.id);
@@ -149,6 +153,7 @@ var Game = function(gameObjectPath, session){
 	this.toMainpageJson = function(){
 		var json = {};
 		json.name = this.name;
+		json.folder_name = this.folder_name;
 		json.player_count = this.player_count;
 		json.playtime = this.playtime;
 		json.cover = this.cover_img;
