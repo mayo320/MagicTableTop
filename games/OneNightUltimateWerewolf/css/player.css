@@ -1,0 +1,103 @@
+body{
+	margin: 0; padding: 0; position: absolute; left: 0; top: 0;
+	width: 100%; height: 100%; background: black; color: white;
+}
+li{
+	list-style: none;
+}
+ul{
+	padding: 0;
+}
+.hidden{
+	display: none;
+}
+.abs-center{
+	position: absolute; left: 0rem; right: 0rem; top: 0rem; bottom: 0rem; margin: auto;
+}
+
+#game-frame,
+#hide-mask{
+	position: absolute; left: 0rem; top: 0rem; height: 100%; width: 100%;
+}
+
+#game-frame{
+	color: white; overflow-y: scroll;
+}
+#game-frame.night{
+	background-color: black;
+}
+#game-frame.day{
+	background-color: lightgrey;
+}
+
+#hide-btn{
+	position: fixed; left: 0rem; bottom: 0rem; height: 3rem; text-align: center; width: 100%;
+	background: black; padding-top: 0.5rem; border-top: 1px solid lightgrey;
+}
+#hide-mask{
+	background: black; text-align: center; position: fixed;
+}
+
+/*Chat window*/
+#chat-window{
+	width: 100%; margin-bottom: 3rem;
+}
+#chat-entries{
+	padding: 0.6rem;
+}
+.chat {
+	position: relative; margin: 1rem 0.4rem;
+}
+.chat .icon{
+	height: 3.5rem; width: 3.5rem; background-repeat: no-repeat; background-size: cover;
+	border-radius: 50%; overflow: hidden; vertical-align: bottom; display: inline-block;
+	position: absolute; bottom: 0rem; left: 0rem;
+}
+.chat .icon.announcer{
+	background-image: url("announcer.png");
+}
+.text-entries{
+	display: inline-block; padding: 0.5rem; width: 100%;
+}
+.text p{
+	background: grey; border-radius: 0.2rem; margin: 0rem; display: inline-block; font-size: 1.1rem;
+	border-top-right-radius: 1.5rem; border-bottom-right-radius: 1.5rem;  padding: 0.5rem 1rem;
+}
+.text.top p{border-top-left-radius: 1.5rem;}
+.text.bottom p{border-bottom-left-radius: 1.5rem;}
+.text{
+	color: white; margin: 0.2rem 0rem;
+}
+/*Left text bubbles*/
+.chat.other .text-entries{ padding-left: 4rem; padding-right: 2rem;}
+/*Right text bubbles*/
+.chat.player{text-align: right;}
+.chat.player .text p{background: cornflowerblue;}
+
+/*Types of choice*/
+.choice {margin-top: 4rem; position: relative;}
+.confirm button{
+	width: 100%;
+}
+
+.choice.center,
+.choice.players{
+	text-align: center;
+}
+.role-card{
+	display: inline-block; background: black; color: white; vertical-align: top;
+	border-radius: 0.5rem; border: 1px solid white; position: relative;
+	background-size:cover; margin: 0.2rem 0.1rem;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+
+}
+.choice.center .role-card{
+	width: 7rem; height: 10rem;
+}
+.choice.players .role-card{
+	width: 5rem; height: 7rem;
+}
+
+.role-img{
+	width: 80%;
+}

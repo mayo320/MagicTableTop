@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>One Night Ultimate Werewolf</title>
+	<meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86, user-scalable=no">
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="/games/OneNightUltimateWerewolf/css/player.css">
+</head>
+<body>
+	<script src="/js/jquery.js"></script>
+	<script src="/js/bootstrap.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/clientsocket.js"></script>
+	<script type="text/javascript">
+		var myID = {{PLAYERID}};
+		var playerName = "{{PLAYERNAME}}";
+		var roles = {{ROLES}};
+		var rolesData = {{ROLESDATA}};
+		var GameState = {{GAMESTATE}};
+	</script>
+	<script src="/games/OneNightUltimateWerewolf/js/player.js"></script>
+
+	<div id="game-frame" class="night">
+		<div id="chat-window">
+			<ul id="chat-entries">
+
+				<li class="chat other">
+					<div class="icon announcer"></div>
+					<ul class="text-entries"> <li class="text top bottom"> <p> Please Refresh </p> </li> </ul>
+				</li>
+
+
+			</ul>
+		</div>
+
+		<div class="hidden templates">
+			<div class="template chat announcer">
+				<li class="chat other">
+					<div class="icon announcer"></div>
+					<ul class="text-entries"></ul>
+				</li>
+			</div>
+			<div class="template chat player">
+				<li class="chat player"> <ul class="text-entries"> </ul> </li>
+			</div>
+			<div class="template chat text">
+				<li class="text"><p></p></li>
+			</div>
+			<div class="template chat img">
+				<img class="role-img" src="">
+			</div>
+
+
+			<div class="template ok">
+				<li class="chat choice confirm">
+					<button class="btn btn-success" onclick="sendConfirm(this)">
+						<h4>Okay</h4></button>
+				</li>
+			</div>
+			<div class="template reveal-center">
+				<li class="chat choice center">
+					<h3>Center Pile</h3>
+					<button class="role-card" onclick="revealCenterRole(this, 0)">
+						<h1>1</h1>
+					</button>
+					<button class="role-card" onclick="revealCenterRole(this, 1)">
+						<h1>2</h1>
+					</button>
+					<button class="role-card" onclick="revealCenterRole(this, 2)">
+						<h1>3</h1>
+					</button>
+				</li>
+			</div>
+			<div class="template reveal-player">
+				<li class="chat choice players">
+					<h3>Players Cards</h3>
+				</li>
+			</div>
+			<div class="template reveal-player-entry">
+				<button class="role-card"></button>
+			</div>
+			<div class="template swap-player"></div>
+			<div class="template swap-center"></div>
+		</div>
+
+
+		<div id="hide-btn" onclick="toggleHideMask(true)">
+			<h4>Tap to hide screen</h4>
+		</div>
+		<div id="hide-mask" onclick="toggleHideMask(false)" class="hidden">
+			<h4 class="abs-center" style="height: 3rem;">Tap anywhere to show screen</h4>
+		</div>
+	</div>
+
+
+</body>
+</html>
