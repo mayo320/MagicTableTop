@@ -20,7 +20,34 @@
 	</script>
 	<script src="/games/OneNightUltimateWerewolf/js/player.js"></script>
 
-	<div id="game-frame" class="night">
+	<div id="game-select" class="hidden">
+		<div style="padding: 1rem; border-bottom: 1px solid grey;">
+			<h1>Total Players: <span class="player_count"></span></h1>
+			<h2>Current Role Count: <span class="role_count"></span></h2>
+		</div>
+		<ul>
+		</ul>
+		<div style="width:100%;text-align: center;">
+			<button class="btn btn-success" disabled onclick="sendRoles(true)">
+				<h1>OKAY</h1>
+			</button>
+		</div>
+
+
+		<div class="hidden templates">
+			<div class="role-select template">
+				<li class="role-card none">
+					<img src="https://cdn.shopify.com/s/files/1/0740/4855/products/werewolf_2048x.png">
+					<div class="info" onclick="">
+						<h1 class="count">2</h1>
+						<span>Tap to delete</span>
+					</div>
+				</li>
+			</div>
+		</div>
+	</div>
+
+	<div id="game-frame" class="night hidden">
 		<div id="chat-window">
 			<ul id="chat-entries">
 
@@ -91,7 +118,6 @@
 			<h4 class="abs-center" style="height: 3rem;">Tap anywhere to show screen</h4>
 		</div>
 	</div>
-
 
 </body>
 </html>

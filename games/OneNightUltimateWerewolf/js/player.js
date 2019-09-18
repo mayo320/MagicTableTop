@@ -5,6 +5,7 @@ var player; // self
 var chats;
 var socket;
 var last_chat_length = 0;
+var role_select = {}; // indexed by role string, number of thing
 
 $(document).ready(function(){
 	socket = new MTSocket("player");
@@ -15,6 +16,16 @@ $(document).ready(function(){
 		player = players[myID];
 
 		UIUpdateViewCards();
+
+		$("#game-select .player_count").html(data.players.length);
+
+		if (payload.gameState < GameState.role_reveal) {
+			$("#game-frame").addClass("hidden");
+			if (data.players[myID].ishost) $("#game-select").removeClass("hidden");
+		} else {
+			$("#game-frame").removeClass("hidden");
+			$("#game-select").addClass("hidden");
+		}
 	});
 	socket.onReceiveEvent("CHATS", function(payload){
 		chats = payload;
@@ -27,9 +38,54 @@ $(document).ready(function(){
 		}
 	});
 
+	// fix rolesData
+	for (key in rolesData) {
+		if (!rolesData[key].max) rolesData[key].max = rolesData.default.max;
+		if (!rolesData[key].min) rolesData[key].min = rolesData.default.min;
+		if (!rolesData[key].step) rolesData[key].step = rolesData.default.step;
+	}
+
 	UIInitTemplates();
+	UIUpdateRoleSelect();
 });
 
+var templates = {};
+function UIInitTemplates(){
+	templates.role_select = $(".template.role-select").html();
+
+	templates.chat_announcer = $(".template.chat.announcer").html();
+	templates.chat_player = $(".template.chat.player").html();
+	templates.chat_text = $(".template.chat.text").html();
+	templates.chat_img = $(".template.chat.img").html();
+
+	templates.ok_btn = $(".template.ok").html();
+	templates.reveal_center = $(".template.reveal-center").html();
+	templates.reveal_player = $(".template.reveal-player").html();
+	templates.reveal_player_entry = $(".template.reveal-player-entry").html();
+}
+
+function UIUpdateRoleSelect(){
+	var keys = Object.keys(rolesData);
+	var $ul = $("#game-select ul");
+	$ul.html("");
+	$.each(keys, (i, key) => {
+		if (key != "default"){
+			if (!("enabled" in rolesData[key]) || rolesData[key].enabled){
+				role_select[key] = 0;
+				$ul.append(templates.role_select);
+				var $li = $ul.find(".role-card:last");
+				$li.find("img").attr("src", rolesData[key].img);
+				$li.find(".info").attr("onclick", "manageRoleSelect(this,'"+key+"', false)");
+				$li.attr("onclick", "manageRoleSelect(this,'"+key+"', true)");
+
+				while (role_select[key] < rolesData[key].min){
+					manageRoleSelect($li[0], key, true);
+				}
+			}
+		}
+	});
+
+}
 
 function UIUpdateViewCards(){
 	if (player.view.center.length > 0) {
@@ -61,20 +117,6 @@ function UIUpdateViewCards(){
 	}
 }
 
-var templates = {};
-function UIInitTemplates(){
-	templates.chat_announcer = $(".template.chat.announcer").html();
-	templates.chat_player = $(".template.chat.player").html();
-	templates.chat_text = $(".template.chat.text").html();
-	templates.chat_img = $(".template.chat.img").html();
-
-	templates.ok_btn = $(".template.ok").html();
-	templates.reveal_center = $(".template.reveal-center").html();
-	templates.reveal_player = $(".template.reveal-player").html();
-	templates.reveal_player_entry = $(".template.reveal-player-entry").html();
-}
-
-
 function UIUpdateChats(){
 	var $ul = $("#chat-entries");
 	$ul.html("");
@@ -102,8 +144,10 @@ function UIUpdateChats(){
 			// action
 			if (chat.type == "ok") { 
 				var next_state = chat.next_state == false ? false : true;
-				if (chat.pending) $ul.append(templates.ok_btn);
-				$ul.find("button:last").attr("onclick", "sendConfirm(this, " + next_state + ")");
+				if (chat.pending) {
+					$ul.append(templates.ok_btn);
+					$ul.find("button:last").attr("onclick", "sendConfirm(this, " + next_state + ")");
+				}
 			} 
 			if (chat.type == "reveal-both" || chat.type == "reveal-center" || chat.type == "swap-center") {
 				$ul.append(templates.reveal_center);
@@ -128,13 +172,62 @@ function UIUpdateChats(){
 					}
 				});
 			}
+			if (chat.type == "final-reveal") {
+				if (chat.pending) {
+					$ul.append(templates.ok_btn);
+					$ul.find("button:last").addClass("btn-warning").attr("onclick", "sendReveal(this)");
+					$ul.find("button:last h4").html("REVEAL");
+				}
+			}
 		}
 	});
 }
 
+function manageRoleSelect(obj, role, add){
+	if (this.event){
+		this.event.stopPropagation();
+	    this.event.cancelBubble = true;
+	}
+
+	// Update card UI
+	if (add) {
+		role_select[role] += rolesData[role].step;
+		$(obj).removeClass("none");
+	} else {
+		if (role_select[role] > 0) {
+			role_select[role] -= rolesData[role].step;
+		}
+	}
+
+	if (role_select[role] > rolesData[role].max) role_select[role] = rolesData[role].max
+	if (role_select[role] < rolesData[role].min) role_select[role] = rolesData[role].min
+	if (role_select[role] == 0) $(obj).closest(".role-card").addClass("none");
+	$(obj).find(".count").html(role_select[role]);
+
+	// Update info and button UI
+	var count = 0;
+	for(key in role_select){ count += role_select[key]; }
+
+	$("#game-select .role_count").html(count);
+	if (data && count == data.players.length + 3) {
+		$("#game-select .role_count").addClass("good").removeClass("bad");
+		$("#game-select button").attr("disabled", false);
+	} else {
+		$("#game-select .role_count").addClass("bad").removeClass("good");
+		$("#game-select button").attr("disabled", true);
+	}
+	sendRoles(false);
+}
+function sendRoles(complete){
+	var payload = {
+		role_select: role_select,
+		complete: complete 
+	};
+	socket.sendEvent("PLAYER_ROLES", payload);
+}
 
 function toggleHideMask(show){
-	if (show) $("#hide-mask").removeClass("hidden"); 
+	if (show) $("#hide-mask").removeClass("hidden");
 	else $("#hide-mask").addClass("hidden");
 }
 
@@ -169,4 +262,8 @@ function swapPlayerRoles(obj, pID){
 function sendConfirm(obj, next_state){
 	$(obj).addClass("hidden");
 	socket.sendEvent("PLAYER_CONFIRM", next_state);
+}
+function sendReveal(obj) {
+	$(obj).addClass("hidden");
+	socket.sendEvent("PLAYER_REVEAL_ROLES", 1);	
 }

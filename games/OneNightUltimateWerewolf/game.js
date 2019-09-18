@@ -59,14 +59,15 @@ var Game = function(){
 	};
 	var rolesData = {
 		default: {
+			power: "None",
 			win: "You are in the Village Team. You win as long as at least one Werewolf dies. But if no one is Werewolf, everyone has to live.",
-			min: 0, max: 1
+			min: 0, max: 1, step: 1
 		},
 	};
 	rolesData[roles.wolf] = {
 		win: "When no Werewolves are killed, or if minion is killed.",
 		power: "You know the other Werewolf. If no other Werewolf is present, you can look at a card from the center pile.",
-		max: 2,
+		max: 2, min: 1,
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/werewolf_2048x.png",
 	};
 	rolesData[roles.minion] = {
@@ -76,7 +77,7 @@ var Game = function(){
 	};
 	rolesData[roles.mason] = {
 		power: "You know the other Mason.",
-		min: 2, max: 2,
+		max: 2, step: 2,
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/mason_2048x.png",
 	};
 	rolesData[roles.seer] = {
@@ -103,15 +104,17 @@ var Game = function(){
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/villager_2048x.png",
 	};
 	rolesData[roles.hunter] = {
-		power: "If you die, the person you point at also dies.",
+		power: "If you die, the person you point at also dies.", enabled: false,
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/hunter_2048x.png",
 	};
 	rolesData[roles.dopple] = {
 		power: "You take on the role and objective of the person's role you view.",
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/doppelganger_2048x.png",
+		enabled: false,
 	};
 	rolesData[roles.tanner] = {
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/tanner_2048x.png",
+		enabled: false,
 	}
 	
 	// var rolesSelected = [roles.wolf, roles.wolf, roles.villager, roles.robber, roles.seer, roles.trouble];
@@ -119,6 +122,7 @@ var Game = function(){
 	var rolesSelected = [roles.wolf, roles.robber, roles.robber, roles.insomniac, roles.insomniac, roles.insomniac];
 
 	var rolesCenter = [];
+	var roleSelect = {}; // indexed by string, counts the number of roles;
 
 	// required functions
 	this.initPlayers = function(players){
@@ -146,7 +150,9 @@ var Game = function(){
 			this.initializeGame();
 		}
 		html = html.replace("{{ROLES}}", JSON.stringify(roles));
+		html = html.replace("{{ROLESDATA}}", JSON.stringify(rolesData));
 		html = html.replace("{{GAMESTATE}}", JSON.stringify(GameState));
+		html = html.replace("{{ROLESELECT}}", JSON.stringify(roleSelect));
 		return html;
 	}
 	this.initPlayerHTML = function(playerID, html){
@@ -207,10 +213,19 @@ var Game = function(){
 		var increment_chat = false;
 		switch(event){
 			case "PLAYER_ROLES":
-				// assume front-end does the checks, apply payload to selected roles 
-				rolesSelected = payload;
-				this.initializeRoles();
-				gameState = GameState.wolf;
+				// player role select
+				roleSelect = payload.role_select;
+				if (payload.complete) {
+					rolesSelected = [];
+					for (key in payload.role_select) {
+						for (var i = 0; i < payload.role_select[key]; i++) {
+							rolesSelected.push(key);
+						}
+					}
+					this.initializeRoles();
+					gameState = GameState.role_reveal;
+				}
+				this.sendEventToMain("ROLES_SELECT", roleSelect);
 				break;
 
 			case "PLAYER_WOLF":
@@ -259,6 +274,10 @@ var Game = function(){
 				// For no non swap power confirmations
 				p.confirm = payload;
 				increment_chat = true;
+				break;
+			case "PLAYER_REVEAL_ROLES":
+				// Reveals final roles
+				this.players[playerID].reveal = true;
 				break;
 
 			case "EMIT":
@@ -533,10 +552,35 @@ var Game = function(){
 					Text("Everyone! It's time to wake up!"),
 					Text("You have 10 minutes to discuss amongst yourselves."),
 					Text("At the end, you must each vote on who to kill. And you win or lose depending on who is killed!"),
-					Text("Alright, let us begin!"),
+					Text("You may press the button to all reveal roles now."),
 				]
 			};
 			chats.push(chat);
+			chat = {
+				side: -1, type: "final-reveal", pending: (p.reveal ? false : true)
+			}
+			chats.push(chat);
+
+			if (p.reveal){
+				chat = {
+					side: 1, texts: [Text("When everybody is ready, please reveal me my final role.")]
+				}
+				chats.push(chat);
+			}
+
+			var all_reveal = true;
+			this.loopPlayers((id, o) => all_reveal &= (o.reveal ? true : false));
+			if (all_reveal) {
+				var new_role = p.role[p.role.length-1];
+					chat = {
+					side: 0,
+					texts: [
+						Text("Your final role is <b>" + new_role +"</b>!"),
+						Img(rolesData[new_role].img)
+					]
+				};
+				chats.push(chat);
+			}
 		}
 
 		return chats;
@@ -590,9 +634,7 @@ var Game = function(){
 	this.initializeGame = function(){
 		// get players to choose available roles
 		initialized = true;
-		gameState = GameState.role_reveal;
-		this.startGame();
-		this.initializeRoles(); // for testing
+		gameState = GameState.select;
 	}
 	this.startGame = function(){
 

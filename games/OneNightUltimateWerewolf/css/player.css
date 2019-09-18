@@ -101,3 +101,28 @@ ul{
 .role-img{
 	width: 80%;
 }
+
+
+/* Game select */
+#game-select ul {text-align: center;}
+#game-select .role-card{
+	width: 28%; position: relative; display: inline-block; border: none;
+}
+#game-select .role-card img{
+	width: 100%;
+}
+#game-select .role-card .info{
+	position: absolute; bottom: 0rem; left: 0rem; width: 100%; border-top:1px solid grey;
+	background: rgba(0,0,0,0.5);
+}
+#game-select .role-card .info span{
+	color: grey;
+}
+#game-select .role-card.none{
+	opacity: 0.5;
+}
+#game-select .role-card.none .info {
+	display: none;
+}
+#game-select .role_count.good{color: green;}
+#game-select .role_count.bad{color: red;}

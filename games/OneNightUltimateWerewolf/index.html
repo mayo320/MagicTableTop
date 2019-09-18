@@ -13,12 +13,32 @@
 	<script src="/js/clientsocket.js"></script>
 	<script type="text/javascript">
 		var roles = {{ROLES}};
+		var rolesData = {{ROLESDATA}};
 		var GameState = {{GAMESTATE}};
+		var role_select = {{ROLESELECT}};
 	</script>
 	<script src="/games/OneNightUltimateWerewolf/js/main.js"></script>
 
-	<h1>
-		ONE NIGHT ULTIMATE WEREWOLF
-	</h1>
+	<div id="game-frame">
+		<ul id="role-frame">
+			
+		</ul>
+
+
+		<div class="hidden templates">
+			<div class="template role-item">
+				<li class="role-item">
+				<img src="https://cdn.shopify.com/s/files/1/0740/4855/products/werewolf_2048x.png">
+				<h1 class="counter">12</h1>
+				<div class="text-block">
+					<h4 class="title">Power</h4>
+					<h5 class="power">You know the other Werewolf. If no other Werewolf is present, you can look at a card from the center pile.</h5> <hr>
+					<h4 class="title">Win Condition</h4>
+					<p class="win">Winning</p>
+				</div>
+			</li>
+			</div>
+		</div>
+	</div>
 </body>
 </html>
