@@ -180,16 +180,29 @@ var App = function(){
 		player.socket.emit("ev-joined", pinfo);
 		updateLobbyHost();
 	}
+	var resetGameContext = function(folderName){
+		// Reset current game context
+		for (var i = 0; i < games.length; i++){
+			var game = games[i];
+			var folder_name = game.folder_name;
+			if (folder_name == folderName) {
+				delete games[i];
+				games[i] = new Game(folder_name, session);
+			}
+		}
+	}
 	var restartGame = function(){
 		console.log("Restarting game " + currentGame.name + "...");
 		currentGame.endGame();
-		startGame(currentGame.name);
+		resetGameContext(currentGame.folder_name);
+		startGame(currentGame.folder_name);
 		mainIO.emit("ev-restartgame", true);
 		playersIO.emit("ev-restartgame", true);
 	}
 	var returnHome = function(){
 		console.log("Returning home...");
 		currentGame.endGame();
+		resetGameContext(currentGame.folder_name);
 		currentGame = undefined;
 		for(var i in session.players){
 			var p = session.players[parseInt(i)];
