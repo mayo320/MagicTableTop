@@ -124,6 +124,7 @@ var Game = function(){
 	var rolesCenter = [];
 	var roleSelect = {}; // indexed by string, counts the number of roles;
 
+	var curHost = -1;
 	// required functions
 	this.initPlayers = function(players){
 		for (var i in players){
@@ -142,6 +143,7 @@ var Game = function(){
 				swap: [], // for who the player swapped
 			};
 			this.playerIDs.push(p.id);
+			if (p.host) curHost = p.id;
 		}
 	}
 	// initPlayers would already be called
@@ -214,18 +216,20 @@ var Game = function(){
 		switch(event){
 			case "PLAYER_ROLES":
 				// player role select
-				roleSelect = payload.role_select;
-				if (payload.complete) {
-					rolesSelected = [];
-					for (key in payload.role_select) {
-						for (var i = 0; i < payload.role_select[key]; i++) {
-							rolesSelected.push(key);
+				if (playerID == curHost) {
+					roleSelect = payload.role_select;
+					if (payload.complete) {
+						rolesSelected = [];
+						for (key in payload.role_select) {
+							for (var i = 0; i < payload.role_select[key]; i++) {
+								rolesSelected.push(key);
+							}
 						}
+						this.initializeRoles();
+						gameState = GameState.role_reveal;
 					}
-					this.initializeRoles();
-					gameState = GameState.role_reveal;
+					this.sendEventToMain("ROLES_SELECT", roleSelect);
 				}
-				this.sendEventToMain("ROLES_SELECT", roleSelect);
 				break;
 
 			case "PLAYER_WOLF":
