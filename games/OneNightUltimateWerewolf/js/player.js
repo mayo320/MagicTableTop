@@ -75,10 +75,10 @@ function UIUpdateRoleSelect(){
 				$ul.append(templates.role_select);
 				var $li = $ul.find(".role-card:last");
 				$li.find("img").attr("src", rolesData[key].img);
-				$li.find(".info").attr("onclick", "manageRoleSelect(this,'"+key+"', false)");
-				$li.attr("onclick", "manageRoleSelect(this,'"+key+"', true)");
+				$li.find(".info").attr("onclick", "clickRoleSelect(this,'"+key+"', false)");
+				$li.attr("onclick", "clickRoleSelect(this,'"+key+"', true)");
 
-				while (role_select[key] < rolesData[key].min){
+				while (role_select[key] < roleSelect[key]){
 					manageRoleSelect($li[0], key, true);
 				}
 			}
@@ -179,16 +179,26 @@ function UIUpdateChats(){
 					$ul.find("button:last h4").html("REVEAL");
 				}
 			}
+			if (chat.type == "restart") {
+				if (chat.pending) {
+					$ul.append(templates.ok_btn);
+					$ul.find("button:last").removeClass("btn-success").addClass("btn-danger").attr("onclick", "socket.restartGame(this)");
+					$ul.find("button:last h4").html("RESTART GAME");
+				}
+			}
 		}
 	});
 }
 
-function manageRoleSelect(obj, role, add){
+function clickRoleSelect(obj, role, add){
 	if (this.event){
 		this.event.stopPropagation();
 	    this.event.cancelBubble = true;
 	}
-
+	manageRoleSelect(obj, role, add);
+	sendRoles(false);
+}
+function manageRoleSelect(obj, role, add){
 	// Update card UI
 	if (add) {
 		role_select[role] += rolesData[role].step;
@@ -216,7 +226,6 @@ function manageRoleSelect(obj, role, add){
 		$("#game-select .role_count").addClass("bad").removeClass("good");
 		$("#game-select button").attr("disabled", true);
 	}
-	sendRoles(false);
 }
 function sendRoles(complete){
 	var payload = {

@@ -37,6 +37,15 @@ ul{
 #hide-mask{
 	background: black; text-align: center; position: fixed;
 }
+#hide-mask li{
+	color: lightgreen; margin: 0 5rem;
+}
+#hide-mask li.bad{
+	color: tomato;
+}
+#hide-mask li.div{
+	border-bottom: 1px solid grey;
+}
 
 /*Chat window*/
 #chat-window{

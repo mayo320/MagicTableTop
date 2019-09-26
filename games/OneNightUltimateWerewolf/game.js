@@ -60,18 +60,18 @@ var Game = function(){
 	var rolesData = {
 		default: {
 			power: "None",
-			win: "You are in the Village Team. You win as long as at least one Werewolf dies. But if no one is Werewolf, everyone has to live.",
+			win: "Wins if at least one Werewolf dies. (Even if a player on the village team dies). If no player is Werewolf, only wins if no one (not even the Tanner or Minion) dies.",
 			min: 0, max: 1, step: 1
 		},
 	};
 	rolesData[roles.wolf] = {
-		win: "When no Werewolves are killed, or if minion is killed.",
+		win: "Wins if no Werewolves die. If the Tanner is in play, wins if no Werewolves die and the Tanner is still alive.",
 		power: "You know the other Werewolf. If no other Werewolf is present, you can look at a card from the center pile.",
 		max: 2, min: 1,
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/werewolf_2048x.png",
 	};
 	rolesData[roles.minion] = {
-		win: "When there are Werewolves: you die. Otherwise as long as you are not dead.",
+		win: "Wins with the Werewolves, even if he dies. If no player is a Werewolf, wins if any other player dies as long as he (the Minion) does not die and the Tanner is still alive.",
 		power: "You know the Werewolves.",
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/Minion_2048x.png"
 	};
@@ -164,6 +164,7 @@ var Game = function(){
 		html = html.replace("{{ROLES}}", JSON.stringify(roles));
 		html = html.replace("{{ROLESDATA}}", JSON.stringify(rolesData));
 		html = html.replace("{{GAMESTATE}}", JSON.stringify(GameState));
+		html = html.replace("{{ROLESELECT}}", JSON.stringify(roleSelect));
 		return html;
 	}
 
@@ -417,7 +418,9 @@ var Game = function(){
 					action = { side: -1, type: "reveal-both"}
 					break;
 				default:
-					chat.texts.push(Text("You are fast asleep.. zzz"));
+					if (p.role[0] != roles.insomniac) chat.texts.push(Text("You are fast asleep.. zzz"));
+					else chat.texts.push(Text("You can't sleep because you are Insomniac"));
+					chat.texts.push(Text("While Werewolf, Seer, Minion, Masons are doing their thing.."));
 					action = {side: -1, type: "ok", pending:true};
 					break;
 			}
@@ -460,7 +463,9 @@ var Game = function(){
 				}
 
 			} else {
-				chat.texts.push(Text("Zzzzz..."));
+				if (p.role[0] != roles.insomniac) chat.texts.push(Text("You are still alseep... Zzzzz..."));
+				else chat.texts.push(Text("You are awake because you're Insomniac"));
+				chat.texts.push(Text("As Robber sneaks around.."));
 				chats.push(chat);
 				if (p.chat_state == ChatState.robber) {
 					chats.push({ side: -1, type: "ok", pending:true});
@@ -493,7 +498,13 @@ var Game = function(){
 					chats.push(chat);
 				}
 			} else {
-				chat.texts.push(Text("Zzzzz...Zz"));
+				var dreams = ["donuts", "losing weight", "gaining weight", "that cringe moment back in highschool",
+				"the square root of -1", "the stove you forgot to turn off", "the pee currently in your bladder",
+				"cakes", "sake bombs", "soju bombs", "bombs", "fine wine", "the werewolf on your left",
+				"the traitor on your right", "the dummy in front of you", "the snake from the last round"];
+				if (p.role[0] != roles.insomniac) chat.texts.push(Text("You dreaming about " + (dreams[randInt(0,dreams.length)])));
+				else chat.texts.push(Text("You feel tired because you are Insomniac"));
+				chat.texts.push(Text("As Trouble Maker stirs up troubles."));
 				chats.push(chat);
 				if (p.chat_state == ChatState.trouble) {
 					chats.push({ side: -1, type: "ok", pending:true});
@@ -539,6 +550,7 @@ var Game = function(){
 			}
 			else {
 				chat.texts.push(Text("..ZzZ"));
+				chat.texts.push(Text("As Insomniac wakes up to find their new identity, the Drunk goes to the bar and got wasted."));
 				chats.push(chat);
 				if (p.chat_state == ChatState.drunk) {
 					chats.push({ side: -1, type: "ok", pending:true});
@@ -576,7 +588,7 @@ var Game = function(){
 			this.loopPlayers((id, o) => all_reveal &= (o.reveal ? true : false));
 			if (all_reveal) {
 				var new_role = p.role[p.role.length-1];
-					chat = {
+				chat = {
 					side: 0,
 					texts: [
 						Text("Your final role is <b>" + new_role +"</b>!"),
@@ -584,6 +596,12 @@ var Game = function(){
 					]
 				};
 				chats.push(chat);
+				if (curHost == p.id){
+					chat = {
+						side: -1, type: "restart", pending: true
+					}
+					chats.push(chat);
+				}
 			}
 		}
 

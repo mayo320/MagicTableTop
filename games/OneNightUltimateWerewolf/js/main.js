@@ -1,6 +1,8 @@
+var data;
 $(document).ready(function(){
 	socket = new MTSocket("main");
 	socket.onReceiveEvent("EMIT", function(payload){
+		data = payload;
 	});
 	socket.onReceiveEvent("ROLES_SELECT", function(payload){
 		console.log(payload);

@@ -17,6 +17,7 @@
 		var roles = {{ROLES}};
 		var rolesData = {{ROLESDATA}};
 		var GameState = {{GAMESTATE}};
+		var roleSelect = {{ROLESELECT}}; // default one, started with
 	</script>
 	<script src="/games/OneNightUltimateWerewolf/js/player.js"></script>
 
@@ -115,7 +116,25 @@
 			<h4>Tap to hide screen</h4>
 		</div>
 		<div id="hide-mask" onclick="toggleHideMask(false)" class="hidden">
-			<h4 class="abs-center" style="height: 3rem;">Tap anywhere to show screen</h4>
+			<div class="abs-center" style="height: 20rem;">
+				<h4 style="border-bottom: 1px solid grey; padding-bottom:1rem;">Tap anywhere to show screen</h4>
+				<h3>
+					Night Routines:
+				</h3>
+				<h4>
+					<ul>
+						<li class="bad"> Werewolves </li>
+						<li class="bad"> Minion </li>
+						<li> Masons </li>
+						<li> Seer </li>
+						<li> Robber </li>
+						<li> Trouble Maker </li>
+						<li> Drunk </li>
+						<li> Insomniac </li>
+					</ul>
+				</h4>
+			</div>
+
 		</div>
 	</div>
 
