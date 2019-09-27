@@ -104,7 +104,7 @@ var Game = function(){
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/villager_2048x.png",
 	};
 	rolesData[roles.hunter] = {
-		power: "If you die, the person you point at also dies.", enabled: false,
+		power: "If you die, the person you point at also dies.",
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/hunter_2048x.png",
 	};
 	rolesData[roles.dopple] = {
@@ -114,7 +114,7 @@ var Game = function(){
 	};
 	rolesData[roles.tanner] = {
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/tanner_2048x.png",
-		enabled: false,
+		win: "You win when you die. If you die, Werewolves cannot win.",
 	}
 	
 	// var rolesSelected = [roles.wolf, roles.wolf, roles.villager, roles.robber, roles.seer, roles.trouble];
@@ -142,6 +142,7 @@ var Game = function(){
 					center: [], player: []
 				}, // for who the player viewed
 				swap: [], // for who the player swapped
+				chats: [], // list of chat history
 			};
 			this.playerIDs.push(p.id);
 			if (p.host) curHost = p.id;
@@ -605,8 +606,16 @@ var Game = function(){
 				}
 			}
 		}
+		var index = p.chats.length;
+		while (index < chats.length){
+			p.chats.push(chats[index]);
+			index++;
+		}
+		for (var i = 0; i < p.chats.length; i++) {
+			if (p.chats[i].pending) p.chats[i] = chats[i];
+		}
 
-		return chats;
+		return p.chats;
 	}
 	var Text = function(string){
 		return {text: string};
@@ -628,6 +637,7 @@ var Game = function(){
 			rolesSelected: rolesSelected,
 			players: this.playerIDs.map((k) => {
 				var temp = copy(this.players[k]);
+				delete temp.chats;
 				return temp;
 			})
 		}

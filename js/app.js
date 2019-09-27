@@ -302,7 +302,6 @@ var App = function(){
 				}
 				socket.use((packet, next) => {
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-				log.info("Action from " + p.name);
 				currentGame.gameObject.onReceiveEventFromPlayer(p.id, packet[0], packet[1]);
 				next();
 			});
