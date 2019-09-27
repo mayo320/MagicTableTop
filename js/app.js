@@ -286,10 +286,12 @@ var App = function(){
 						socketid: p.socket.id,
 						clientip: p.socketip
 					});
-					updateLobbyHost();
 
 					if (typeof currentGame != "undefined") {
 						currentGame.gameObject.onPlayerDisconnect(p.id);
+					} else {
+						// Update host if no game is going on
+						updateLobbyHost();
 					}
 				}
 			});
