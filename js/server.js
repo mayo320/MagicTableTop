@@ -7,11 +7,12 @@ var io = require("socket.io")(server);
 var path = require("path");
 var fs = require("fs");
 var helmet = require("helmet");
+const log = require(__dirname + "/log.js")
 
 var Server = function(config, callback){
 	var port = config.port;
 
-	console.log("Listening on port " + port);
+	log.info("Listening on port " + port);
 
 	server.listen(port, config.address);
 

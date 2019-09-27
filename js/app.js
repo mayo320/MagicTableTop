@@ -5,6 +5,7 @@ var path = require("path");
 var session = require(__dirname + "/session.js");
 var Server = require(__dirname + "/server.js");
 var Game = require(__dirname + "/game.js");
+const log = require(__dirname + "/log.js")
 
 
 global.root_path = path.resolve(__dirname + "/../");
@@ -47,7 +48,7 @@ var App = function(){
 		 		if (typeof game != "undefined"){
 		 			games.push(game);
 		 		}else{
-		 			console.error("Game is undefined");
+		 			log.error("Game is undefined");
 		 		}
 	 		}
 	 	}
@@ -128,7 +129,7 @@ var App = function(){
 		}
 
 		if (game != null){
-			console.log("Starting game " + gameName + "...");
+			log.info("Starting game " + gameName + "...");
 			currentGame = game;
 			game.init();
 			game.setupHTML(app);
@@ -136,7 +137,7 @@ var App = function(){
 			game.startGame();
 			return true;
 		}else{
-			console.log("Cannot find game " + gameName);
+			log.info("Cannot find game " + gameName);
 			return false;
 		}
 	}
@@ -186,13 +187,12 @@ var App = function(){
 			var game = games[i];
 			var folder_name = game.folder_name;
 			if (folder_name == folderName) {
-				delete games[i];
-				games[i] = new Game(folder_name, session);
+				// delete games[i].gameObject;
 			}
 		}
 	}
 	var restartGame = function(){
-		console.log("Restarting game " + currentGame.name + "...");
+		log.info("Restarting game " + currentGame.name + "...");
 		currentGame.endGame();
 		resetGameContext(currentGame.folder_name);
 		startGame(currentGame.folder_name);
@@ -200,7 +200,7 @@ var App = function(){
 		playersIO.emit("ev-restartgame", true);
 	}
 	var returnHome = function(){
-		console.log("Returning home...");
+		log.info("Returning home...");
 		currentGame.endGame();
 		resetGameContext(currentGame.folder_name);
 		currentGame = undefined;
@@ -223,9 +223,17 @@ var App = function(){
 		mainIO = io.of("/main");
 		controlIO = io.of("/control");
 
+		mainIO.on("connection", (socket) => {
+			socket.use((packet, next) => {
+				if (typeof currentGame != "undefined") {
+					currentGame.gameObject.onReceiveEventFromMain(packet[0], packet[1]);
+					next();
+				}
+			});
+		});
+
 		// Settings IO on players
 		playersIO.on("connection", function(socket){
-
 			var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 			if (p != null){
 				// Updates the socket for reconnects
@@ -236,10 +244,10 @@ var App = function(){
 			socket.on("ev-playerjoin", function(playername){
 				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
 				if (p == null){
-					console.log(playername + " Joined");
+					log.info(playername + " Joined");
 					p = session.addPlayer(playername, socket);
 				}else{
-					console.log(playername + " Rejoined");
+					log.info(playername + " Rejoined");
 					p.updateName(playername);
 				}
 
@@ -279,8 +287,26 @@ var App = function(){
 						clientip: p.socketip
 					});
 					updateLobbyHost();
+
+					if (typeof currentGame != "undefined") {
+						currentGame.gameObject.onPlayerDisconnect(p.id);
+					}
 				}
 			});
+
+			// game specific
+			if (typeof currentGame != "undefined") {
+				if (p != null){
+					currentGame.playerJoin(p);
+					currentGame.gameObject.onPlayerConnect(p.id);
+				}
+				socket.use((packet, next) => {
+				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
+				log.info("Action from " + p.name);
+				currentGame.gameObject.onReceiveEventFromPlayer(p.id, packet[0], packet[1]);
+				next();
+			});
+			}
 		});
 
 		controlIO.on("connection", function(socket){
@@ -289,6 +315,7 @@ var App = function(){
 				d.state = "LOBBY";
 				if (typeof currentGame != "undefined"){
 					d.game = currentGame.toMainpageJson();
+					d.gameJSON = currentGame.toJSON();
 					d.state = "GAME";
 				}
 				d.session = session.toJSON();
@@ -309,7 +336,7 @@ var App = function(){
 	 * argumetn callback - callback function to set main.js config
 	 */
 	this.start = function(callback){
-		console.log("Loading configuration file...");
+		log.info("Loading configuration file...");
 		config = require(global.root_path + "/config.js");
 
 		var server = new Server(config, function(app, io){

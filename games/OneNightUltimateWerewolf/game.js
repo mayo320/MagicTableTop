@@ -123,6 +123,7 @@ var Game = function(){
 
 	var rolesCenter = [];
 	var roleSelect = {}; // indexed by string, counts the number of roles;
+	roleSelect[roles.wolf] = 1;
 
 	var curHost = -1;
 	// required functions
@@ -664,7 +665,7 @@ var Game = function(){
 
 	this.initializeRoles = function(){
 		var available_roles = copy(rolesSelected);
-		this.loopPlayers((id, p) => p.role.push(spliceRandom(available_roles)));
+		this.loopPlayers((id, p) => p.role = [spliceRandom(available_roles)]);
 		rolesCenter = available_roles;
 	}
 

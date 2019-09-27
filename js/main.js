@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
 const core = require(__dirname + "/app.js");
+const log = require(__dirname + "/log.js");
 
 var config = {};
 
@@ -30,7 +31,7 @@ function createWindow () {
 
 	// and load the index.html of the app.
 	config.address = (config.address === void 0) | (config.address === "") ? (config.address = "localhost") : config.address;
-	console.log(`main URL: http://${global.addresses[0]}:${config.port}/main`);
+	log.info(`main URL: http://${global.addresses[0]}:${config.port}/main`);
 	// mainWindow.loadURL(`http://${config.address}:${config.port}/main`);
 	mainWindow.loadURL(`http://${global.addresses[0]}:${config.port}/main`);
 	// mainWindow.loadFile('index.html');
@@ -51,7 +52,7 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", function() {
-    console.log("Launching application...");
+    log.info("Launching application...");
     createWindow();
 });
 

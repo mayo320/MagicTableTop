@@ -3,12 +3,14 @@
 var path = require("path");
 var fs = require("fs");
 var express = require("express");
+const log = require(__dirname + "/log.js");
 
 var Game = function(gameFolderName, session){
  	var gameRootPath = path.resolve(global.root_path + "/games/" + gameFolderName);
 	var gameObjectPath = path.resolve(gameRootPath + "/game.js");
 	var gameObject = require(gameObjectPath);
 
+	this.hash = "";
 	this.gameObject = new gameObject();
 	this.folder_name = gameFolderName;
 	this.name = this.gameObject.name;
@@ -27,7 +29,10 @@ var Game = function(gameFolderName, session){
 
 	// Functions
 	this.init = function(){
+		this.hash = log.getHash();
 		this.gameObject = new gameObject();
+		this.gameObject.hash = this.hash;
+		log.info("Creating new game with hash " + this.hash);
 	}
 	this.startGame = function(){
 		this.session.ingame = true;
@@ -39,7 +44,7 @@ var Game = function(gameFolderName, session){
 		this.mainIO.clients((err, clients) => {
 			// Join main client to this game room
 			for (var i in clients){
-				this.mainIO.connected[clients[i]].join(this.folder_name);
+				this.mainIO.connected[clients[i]].join(this.hash);
 			}
 		});
 
@@ -56,6 +61,7 @@ var Game = function(gameFolderName, session){
 		}
 	}
 	this.endGame = function(){
+		log.info("Ending game " + this.name);
 		this.session.ingame = false;
 		this.players = this.session.players;
 		for (var i in this.players){
@@ -64,16 +70,19 @@ var Game = function(gameFolderName, session){
 
 		this.mainIO.clients((err, clients) => {
 			for (var i in clients){
-				this.mainIO.connected[clients[i]].leave(this.folder_name);
+				this.mainIO.connected[clients[i]].leave(this.hash);
 			}
 		});
-		// delete this.gameObject;
+		delete this.gameObject;
+		this.gameObject = null;
 	}
 	this.playerJoin = function(player){
-		player.socket.join(this.folder_name);
+		player.socket.join(this.hash);
+		// player.socket.join(this.folder_name);
 	}
 	this.playerLeave = function(player){
-		player.socket.leave(this.folder_name);
+		player.socket.leave(this.hash);
+		// player.socket.leave(this.folder_name);
 	}
 
 	this.setupHTML = function(app){
@@ -85,12 +94,14 @@ var Game = function(gameFolderName, session){
 		}
 
 		app.get("/main/" + this.folder_name, (req, res) => {
+			if (this.gameObject == null) log.error("gameObject is NULL! Game hash: " + this.hash);
 			var html = fs.readFileSync(this.mainHTML, {encoding: "utf8"});
 			html = this.gameObject.initMainHTML(html);
 			res.send(html);
 		});
 
 		app.get("/" + this.folder_name, (req, res) => {
+			if (this.gameObject == null) log.error("gameObject is NULL! Game hash: " + this.hash);
 			var html = fs.readFileSync(this.playerHTML, {encoding: "utf8"});
 			var p = this.session.findPlayerByIp(req.ip);
 
@@ -104,34 +115,7 @@ var Game = function(gameFolderName, session){
 	}
 	this.setupSocketIO = function(io){
 		this.playersIO = io.of("/player");
-		this.mainIO = io.of("/main");
-
-		this.mainIO.in(this.folder_name).on("connection", (socket) => {
-			socket.use((packet, next) => {
-				this.gameObject.onReceiveEventFromMain(packet[0], packet[1]);
-				next();
-			})
-		});
-
-		this.playersIO.in(this.folder_name).on("connection", (socket) => {
-			var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-			if (p != null){
-				this.gameObject.onPlayerConnect(p.id);
-			}
-
-			socket.use((packet, next) => {
-				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-				this.gameObject.onReceiveEventFromPlayer(p.id, packet[0], packet[1]);
-				next();
-			});
-
-			socket.on("disconnect", () => {
-				var p = session.findPlayerByIp(socket.request.connection.remoteAddress);
-				if (p != null){
-					this.gameObject.onPlayerDisconnect(p.id);
-				}
-			});
-		});
+		this.mainIO = io.of("/main")
 
 		this.gameObject.sendEventToPlayers = (players, event, payload) => {
 			players = players.map((x) => parseInt(x));
@@ -158,6 +142,14 @@ var Game = function(gameFolderName, session){
 		json.playtime = this.playtime;
 		json.cover = this.cover_img;
 		return json;
+	}
+	this.toJSON = function(){
+		var clients = [];
+		this.playersIO.clients((err, c) => clients = c);
+		return { 
+			playerRooms: this.players.map((p) => Object.keys(p.socket.rooms)),
+			playerClients: clients
+		};
 	}
 }
 
