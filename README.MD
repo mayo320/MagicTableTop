@@ -32,6 +32,10 @@ npm install --save express
 npm install --save socket.io
 npm install --save helmet
 ```
+Or just
+```
+npm install
+```
 Now try running the project
 ```
 npm start
