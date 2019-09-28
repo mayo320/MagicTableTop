@@ -1,5 +1,6 @@
 {
   "name": "MagicTableTop",
+  "productName": "MagicTableTop",
   "version": "1.0.0",
   "description": "Magic Mirror Tabletop Games framework",
   "main": "js/main.js",
@@ -9,11 +10,11 @@
   "author": "Jack Yan",
   "license": "ISC",
   "devDependencies": {
-    "express": "^4.17.1",
-    "helmet": "^3.20.1"
+    "electron": "^1.4.15"
   },
   "dependencies": {
-    "electron": "^2.0.18",
+    "express": "^4.17.1",
+    "helmet": "^3.21.1",
     "socket.io": "^2.2.0"
   }
 }
