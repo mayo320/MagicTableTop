@@ -15,6 +15,10 @@ The following APIs are used
 * [helmet](https://github.com/helmetjs/helmet)
 
 ### Installation
+Download the [zip here](https://github.com/imjackyan/MagicTableTop/releases) (Currently only built for Windows x64 systems)
+Then extract and run MagicTableTop.exe.
+
+### Installation for Devs
 Install [nodejs](https://nodejs.org/en/download/)
 
 Clone this git repo
@@ -26,12 +30,6 @@ Navigate to the project folder "MagicTableTop"
 cd MagicTableTop
 ```
 Install used APIs (use sudo if on Unix system)
-```
-npm install --save electron
-npm install --save express
-npm install --save socket.io
-npm install --save helmet
-```
 Or just
 ```
 npm install
