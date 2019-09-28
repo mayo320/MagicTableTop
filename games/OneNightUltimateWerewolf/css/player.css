@@ -78,10 +78,12 @@ ul{
 	color: white; margin: 0.2rem 0rem;
 }
 /*Left text bubbles*/
-.chat.other .text-entries{ padding-left: 4rem; padding-right: 2rem;}
+.chat.other .text-entries{ padding-left: 4rem; padding-right: 3rem;}
+.chat.player .text-entries{ padding-left: 3rem; }
 /*Right text bubbles*/
 .chat.player{text-align: right;}
 .chat.player .text p{background: cornflowerblue;}
+.chat.player .text p{background: cornflowerblue; text-align: left;}
 
 /*Types of choice*/
 .choice {margin-top: 4rem; position: relative;}
