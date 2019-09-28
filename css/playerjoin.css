@@ -23,10 +23,21 @@ li{list-style: none;}
 	padding: 1rem;
 }
 #gamelist ul{
-	overflow-y: scroll;
+	overflow-y: scroll; text-align: center;
 }
 #gamelist ul li{
-	margin: 0.5rem 0; padding: 0.5rem; background: lightgrey; color: black;
+	margin: 0.5rem; 
+	border: 2px solid grey;
+	color: black;
+	display: inline-block;
+	width: 40%; position: relative;
+}
+#gamelist ul li img{
+	width: 100%;
+}
+#gamelist ul li .name{
+	position: absolute; bottom: 0.5rem; color: white; width: 100%; 
+	background: rgba(0,0,0,0.8); padding: 0.5rem 0rem;
 }
 .btn{
 	background:white;

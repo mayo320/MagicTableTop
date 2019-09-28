@@ -80,6 +80,13 @@
 			<hr>
 			<ul>
 			</ul>
+
+			<div class="template hidden">
+				<li onclick="" class="">
+					<h4 class="name">Game name</h4>
+					<img src="https://www.mindgamesbrisbane.com/wp-content/uploads/2018/10/689070013563.jpeg">
+				</li>
+			</div>
 		</div>
 
 
@@ -87,12 +94,16 @@
 			var games = {{GAMES}};
 			
 			var $ul = $("#gamelist ul");
+			var template = $("#gamelist .template").html();
+
 			for(var i in games){
 				var g = games[i];
-				var li = "<li onclick='playGame(\""+g.folder_name+"\")'>";
-				li += "<h4>" + g.name + "</h4>";
-				li += "</li>";
-				$ul.append(li);
+				// var li = "<li onclick='playGame(\""+g.folder_name+"\")'>";
+				$ul.append(template);
+				var li = $ul.find("li:last");
+				li.find('h4').html(g.name);
+				li.attr("onclick", "playGame('"+g.folder_name+"')");
+				li.find("img").attr("src", g.cover);
 			}
 		</script>
 	</body>
