@@ -37,6 +37,14 @@ $(document).ready(function(){
 			last_chat_length = chats.length;
 		}
 	});
+	socket.onReceiveEvent("TIMER", function(payload){
+		$("#timer").removeClass("hidden");
+		var string = parseInt(payload / 60) + ":" + (payload % 60)
+		$("#timer .time_left").html(string);
+		if (payload <= 30) {
+			$("#timer .time_left").addClass("red");
+		}
+	});
 
 	// fix rolesData
 	for (key in rolesData) {

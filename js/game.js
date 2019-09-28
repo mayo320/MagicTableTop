@@ -73,6 +73,9 @@ var Game = function(gameFolderName, session){
 				this.mainIO.connected[clients[i]].leave(this.hash);
 			}
 		});
+		if (typeof this.gameObject.endGame == "function"){
+			this.gameObject.endGame();
+		}
 		delete this.gameObject;
 		this.gameObject = null;
 	}

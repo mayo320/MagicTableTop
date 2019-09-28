@@ -22,14 +22,19 @@
 	<script src="/games/OneNightUltimateWerewolf/js/player.js"></script>
 
 	<div id="game-select" class="hidden">
-		<div style="padding: 1rem; border-bottom: 1px solid grey;">
+		<!-- <div style="padding: 1rem; border-bottom: 1px solid grey;">
 			<h1>Total Players: <span class="player_count"></span></h1>
 			<h2>Current Role Count: <span class="role_count"></span></h2>
-		</div>
-		<ul>
+		</div> -->
+		<ul style="padding-top:1rem; margin-bottom: 7rem;">
 		</ul>
-		<div style="width:100%;text-align: center;">
-			<button class="btn btn-success" disabled onclick="sendRoles(true)">
+		<div style="width:100%;text-align: center;position: fixed; bottom: 0rem; background:black;">
+			<div style="border-top: 1px solid white;"></div>
+			<div style="display: inline-block; text-align: left; margin: 0.5rem 0rem;">
+				<h2>Total Players: <span class="player_count"></span></h2>
+				<h3>Current Role Count: <span class="role_count"></span></h3>
+			</div>
+			<button class="btn btn-success" disabled onclick="sendRoles(true)" style="display: inline-block; margin:1rem; vertical-align: top;">
 				<h1>OKAY</h1>
 			</button>
 		</div>
@@ -134,7 +139,10 @@
 					</ul>
 				</h4>
 			</div>
+		</div>
 
+		<div id="timer" class="hidden">
+			<h3>Time left: <span class="time_left"></span></h3>
 		</div>
 	</div>
 

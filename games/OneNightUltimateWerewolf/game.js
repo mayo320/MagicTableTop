@@ -13,7 +13,7 @@ var Game = function(){
 
 	// optional	fields
 	// for cover art on main hub
-	this.cover_img = "https://cdn.shoplightspeed.com/shops/606993/files/12679953/800x600x2/one-night-ultimate-werewolf.jpg",
+	this.cover_img = "https://www.mindgamesbrisbane.com/wp-content/uploads/2018/10/689070013563.jpeg"
 	// game logic fields
 	this.players = {};
 	this.playerIDs = [];
@@ -124,6 +124,9 @@ var Game = function(){
 	var rolesCenter = [];
 	var roleSelect = {}; // indexed by string, counts the number of roles;
 	roleSelect[roles.wolf] = 1;
+
+	var timer = 60*10; // 10 minutes
+	var timerEvent = null;
 
 	var curHost = -1;
 	// required functions
@@ -336,10 +339,13 @@ var Game = function(){
 			texts: [
 				Text("Hello " + p.name + ", Welcome to One Night Ultimate Werewolf!"),
 				Text("I am the announcer, I will be narrating the happenings during the night."),
-				Text("I will now reveal your initial role, please ensure other players cannot see it."),
+				Text("Tonight, the story revoles around these fine lads and ladies:"),
+				Text((this.playerIDs.map((x) => this.players[x].name)).join(", ")),
 			]
 		}
 		chats.push(chat);
+		chats.push({side:0, texts:[
+				Text("I will now reveal your initial role, please ensure other players cannot see it.") ]});
 		var oked = false;
 		if (p.chat_state == ChatState.intro){
 			// side -1 indicates action, pending means player still needs to take action
@@ -465,7 +471,7 @@ var Game = function(){
 				}
 
 			} else {
-				if (p.role[0] != roles.insomniac) chat.texts.push(Text("You are still alseep... Zzzzz..."));
+				if (p.role[0] != roles.insomniac) chat.texts.push(Text("You are still asleep... Zzzzz..."));
 				else chat.texts.push(Text("You are awake because you're Insomniac"));
 				chat.texts.push(Text("As Robber sneaks around.."));
 				chats.push(chat);
@@ -504,7 +510,7 @@ var Game = function(){
 				"the square root of -1", "the stove you forgot to turn off", "the pee currently in your bladder",
 				"cakes", "sake bombs", "soju bombs", "bombs", "fine wine", "the werewolf on your left",
 				"the traitor on your right", "the dummy in front of you", "the snake from the last round"];
-				if (p.role[0] != roles.insomniac) chat.texts.push(Text("You dreaming about " + (dreams[randInt(0,dreams.length)])));
+				if (p.role[0] != roles.insomniac) chat.texts.push(Text("You are dreaming about " + (dreams[randInt(0,dreams.length)])));
 				else chat.texts.push(Text("You feel tired because you are Insomniac"));
 				chat.texts.push(Text("As Trouble Maker stirs up troubles."));
 				chats.push(chat);
@@ -552,7 +558,7 @@ var Game = function(){
 			}
 			else {
 				chat.texts.push(Text("..ZzZ"));
-				chat.texts.push(Text("As Insomniac wakes up to find their new identity, the Drunk goes to the bar and got wasted."));
+				chat.texts.push(Text("As Insomniac wakes up to find their new identity, the Drunk goes to the bar and gets wasted."));
 				chats.push(chat);
 				if (p.chat_state == ChatState.drunk) {
 					chats.push({ side: -1, type: "ok", pending:true});
@@ -564,6 +570,14 @@ var Game = function(){
 
 		// Game state
 		if (gameState >= GameState.game){
+			if (timerEvent == null){
+				timerEvent =  setInterval(() => {
+					timer -= 1;
+					timer = timer < 0 ? 0 : timer;
+					this.sendEventToAll("TIMER", timer);
+				}, 1000);
+			}
+
 			chat = {
 				side: 0,
 				texts: [
@@ -671,6 +685,10 @@ var Game = function(){
 	}
 	this.startGame = function(){
 
+	}
+	this.endGame = function(){
+		clearInterval(timerEvent);
+		timerEvent = null;
 	}
 
 	this.initializeRoles = function(){

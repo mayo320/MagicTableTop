@@ -135,3 +135,13 @@ ul{
 }
 #game-select .role_count.good{color: green;}
 #game-select .role_count.bad{color: red;}
+
+
+
+#timer{
+	position: fixed; top: 0rem; padding: 2rem; color: white; background: rgba(0,0,0,0.8);
+	width: 100%; text-align: center;
+}
+#timer .time_left.red{
+	color: red; font-weight: bold;
+}
