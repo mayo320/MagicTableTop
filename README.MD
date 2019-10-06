@@ -3,7 +3,7 @@
 ## Description
 Magic TableTop is a project similar to [Smart Mirrors](https://www.postscapes.com/diy-smart-mirrors/) where it uses a two-way mirror for reflection and displaying the content of the monitor hidden behind the mirror. However the aim for Magic TableTop is to allow users to play table top games on the surface of the mirror, making expensive table top games accessible to anyone with a Magic TableTop.
 
-This project is a framework that allows user to freely create their own tabletop games. Currently Splendor and Pong are included by default.
+This project is a framework that allows user to freely create their own tabletop games. Currently Avalon, One Night Ultimate Werewolf, Splendor and Pong are included by default.
 
 
 ## Getting started
@@ -15,8 +15,9 @@ The following APIs are used
 * [helmet](https://github.com/helmetjs/helmet)
 
 ### Installation
-Download the [zip here](https://github.com/imjackyan/MagicTableTop/releases) (Currently only built for Windows x64 systems)
+* **Windows**: Download the [zip here](https://github.com/imjackyan/MagicTableTop/releases) (Currently only built for Windows x64 systems)
 Then extract and run MagicTableTop.exe.
+* **Unix**: See **Installation for Devs**
 
 ### Installation for Devs
 Install [nodejs](https://nodejs.org/en/download/)
