@@ -43,3 +43,4 @@ npm start
 ```
 ### Playing it
 The server will start up and a url will be displayed, players will then visit this url on their phone browser. From then on it self explanatory
+![](/css/lobby.jpg)
