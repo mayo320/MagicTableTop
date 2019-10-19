@@ -99,8 +99,9 @@ function UIUpdateViewCards(){
 	if (player.view.center.length > 0) {
 		var $center = $("#chat-window .choice.center .role-card");
 		for (var i = 0; i < player.view.center.length; i++){
-			var index = player.view.center[i];
-			var url = rolesData[data.rolesCenter[index]].img;
+			var index = player.view.center[i][0];
+			var rname = player.view.center[i][1];
+			var url = rolesData[rname].img;
 			$($center[index]).css({"background-image": "url('"+url+"')"});
 		}
 	}
@@ -249,11 +250,12 @@ function toggleHideMask(show){
 }
 
 function revealCenterRole(btn, index){
+	var d = [index, data.rolesCenter[index]]; // <int, string> pair
 	if (player.role[0] == roles.wolf && player.view.center.length < 1){
-		player.view.center.push(index);
+		player.view.center.push(d);
 		socket.sendEvent("PLAYER_WOLF", player.view);
 	} else if (player.role[0] == roles.seer && player.view.center.length < 2 && player.view.player.length == 0){
-		player.view.center.push(index);
+		player.view.center.push(d);
 		socket.sendEvent("PLAYER_SEER", player.view);
 	}
 }

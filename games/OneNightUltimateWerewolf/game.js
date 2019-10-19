@@ -60,7 +60,7 @@ var Game = function(){
 	var rolesData = {
 		default: {
 			power: "None",
-			win: "Wins if at least one Werewolf dies. (Even if a player on the village team dies). If no player is Werewolf, only wins if no one (not even the Tanner or Minion) dies.",
+			win: "Wins if at least one Werewolf dies. (Even if a player on the village team dies). If no player is Werewolf, only wins if no one (exclude Minion) dies. If no Werewolf and Minion is in play, Villagers need to kill Minion.",
 			min: 0, max: 1, step: 1
 		},
 	};
@@ -114,7 +114,7 @@ var Game = function(){
 	};
 	rolesData[roles.tanner] = {
 		img: "https://cdn.shopify.com/s/files/1/0740/4855/products/tanner_2048x.png",
-		win: "You win when you die. If you die, Werewolves cannot win.",
+		win: "You win when you die. If you die, No one else can win.",
 	}
 	
 	// var rolesSelected = [roles.wolf, roles.wolf, roles.villager, roles.robber, roles.seer, roles.trouble];
